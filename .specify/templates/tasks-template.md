@@ -8,7 +8,7 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: Include Jest and Supertest tasks for all user-visible or security-sensitive behavior. Tests are required by the project constitution; omit them only when the feature has no executable behavior, and document that reason.
+**Tests**: Include tasks for route handlers, server actions, relevant client behavior, and security-sensitive behavior using the repository's selected test tools. Tests are required by the project constitution; omit them only when the feature has no executable behavior, and document that reason.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -21,7 +21,7 @@ description: "Task list template for feature implementation"
 ## Path Conventions
 
 - **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
+- **Next.js App Router web app**: `app/`, `components/`, `lib/`, `tests/`
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
 - Paths shown below assume single project - adjust based on plan.md structure
 
@@ -64,7 +64,7 @@ Examples of foundational tasks (adjust based on your project):
 
 - [ ] T004 Setup database schema and migrations framework
 - [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
+- [ ] T006 [P] Setup Next.js route handlers, middleware, and server-action structure
 - [ ] T007 Create base models/entities that all stories depend on
 - [ ] T008 Configure error handling and logging infrastructure
 - [ ] T009 Setup environment configuration management
@@ -153,9 +153,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Jest unit and Supertest integration coverage for changed behavior
+- [ ] TXXX [P] Unit, route-handler/server-action, and end-to-end coverage for changed behavior
 - [ ] TXXX Security hardening, ownership checks, and token/secret redaction
-- [ ] TXXX Swagger, structured logging, global error handling, and deployment documentation updates
+- [ ] TXXX Structured logging, safe error handling, route/server-action, and deployment documentation updates
 - [ ] TXXX Run quickstart.md validation
 
 ---

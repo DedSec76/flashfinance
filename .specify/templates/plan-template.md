@@ -31,12 +31,13 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Strict TypeScript is enabled and no `any` types are introduced.
+- Next.js App Router, React, TypeScript strict mode, Tailwind CSS, MongoDB, and Zod are used;
+  no `any` types are introduced.
 - Authentication, authorization, resource ownership, and session lifecycle are defined for every private path.
 - Zod validation, safe error handling, and secret/token redaction cover all external boundaries.
-- Transaction/category invariants and controlled denormalization are preserved.
-- Jest/Supertest coverage is planned for user-visible and security-sensitive behavior.
-- Swagger, structured logging, deployment configuration, and required environment variables are accounted for.
+- Transaction/category type equality and no-delete-if-used category invariants are preserved.
+- Tests for route handlers, server actions, relevant client behavior, and security-sensitive behavior are planned.
+- Structured logging, deployment configuration, required environment variables, and route/server-action documentation are accounted for.
 - Server/Client Component boundaries and Tailwind-first styling follow the project stack.
 
 ## Project Structure
@@ -62,39 +63,19 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
+# Next.js App Router full-stack project
+app/
+├── (auth)/
+├── (dashboard)/
+├── api/
+├── components/
+├── actions/
 └── lib/
 
 tests/
-├── contract/
 ├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+├── unit/
+└── e2e/
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real
