@@ -1,9 +1,40 @@
-import Link from "next/link";
+"use client";
 
-const IS_AUTHENTICATED = true;
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+export const AUTH_STORAGE_KEY = "flashfinance-authenticated";
+
+export function isAuthenticated() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return localStorage.getItem(AUTH_STORAGE_KEY) === "true";
+}
+
+export function setAuthenticated(isValid: boolean) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.setItem(AUTH_STORAGE_KEY, String(isValid));
+}
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  if (!IS_AUTHENTICATED) {
+  const [ready, setReady] = useState(false);
+  const [authenticated, setAuthenticatedState] = useState(false);
+
+  useEffect(() => {
+    setAuthenticatedState(isAuthenticated());
+    setReady(true);
+  }, []);
+
+  if (!ready) {
+    return null;
+  }
+
+  if (!authenticated) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-6 py-16">
         <h1 className="text-2xl font-semibold tracking-tight">Authentication Required</h1>
