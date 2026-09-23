@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { setAuthenticated } from "@/components/auth/auth-guard";
-import { PageHeader } from "@/components/layout/page-header";
+import {
+  authAlertClass,
+  authButtonClass,
+  authErrorClass,
+  authInputClass,
+  authLabelClass,
+  authLegalClass,
+  authLinkClass,
+} from "@/components/auth/auth-classes";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -113,85 +121,82 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Create Account"
-        subtitle="Set up your account to track income and expenses."
-      />
+    <div className="auth-form-wrap">
+      <div>
+        <h2>Create account</h2>
 
-      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={form.email}
-            onChange={(event) => handleChange("email", event.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-zinc-900 focus:ring-2 focus:ring-zinc-200"
-            placeholder="user.name@example.com"
-            autoComplete="email"
-            aria-invalid={Boolean(errors.email)}
-          />
-          {errors.email ? <p className="text-xs text-red-600">{errors.email}</p> : null}
-        </div>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <div className="auth-field">
+            <label htmlFor="email" className={authLabelClass}>
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(event) => handleChange("email", event.target.value)}
+              className={authInputClass}
+              autoComplete="email"
+              aria-invalid={Boolean(errors.email)}
+            />
+            {errors.email ? <p className={authErrorClass}>{errors.email}</p> : null}
+          </div>
 
-        <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={form.password}
-            onChange={(event) => handleChange("password", event.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-zinc-900 focus:ring-2 focus:ring-zinc-200"
-            placeholder="At least 10 characters"
-            autoComplete="new-password"
-            aria-invalid={Boolean(errors.password)}
-          />
-          {errors.password ? <p className="text-xs text-red-600">{errors.password}</p> : null}
-        </div>
+          <div className="auth-field">
+            <label htmlFor="password" className={authLabelClass}>
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={form.password}
+              onChange={(event) => handleChange("password", event.target.value)}
+              className={authInputClass}
+              autoComplete="new-password"
+              aria-invalid={Boolean(errors.password)}
+            />
+            {errors.password ? <p className={authErrorClass}>{errors.password}</p> : null}
+          </div>
 
-        <div className="space-y-2">
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-700">
-            Confirm Password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            value={form.confirmPassword}
-            onChange={(event) => handleChange("confirmPassword", event.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-zinc-900 focus:ring-2 focus:ring-zinc-200"
-            placeholder="Repeat your password"
-            autoComplete="new-password"
-            aria-invalid={Boolean(errors.confirmPassword)}
-          />
-          {errors.confirmPassword ? (
-            <p className="text-xs text-red-600">{errors.confirmPassword}</p>
-          ) : null}
-        </div>
+          <div className="auth-field">
+            <label htmlFor="confirmPassword" className={authLabelClass}>
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={form.confirmPassword}
+              onChange={(event) => handleChange("confirmPassword", event.target.value)}
+              className={authInputClass}
+              autoComplete="new-password"
+              aria-invalid={Boolean(errors.confirmPassword)}
+            />
+            {errors.confirmPassword ? <p className={authErrorClass}>{errors.confirmPassword}</p> : null}
+          </div>
 
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
-          Password must be at least 10 characters, include 1 uppercase letter, 1 number, and 1 symbol.
-        </div>
+          <p className="auth-hint">Use at least 10 characters, with 1 uppercase letter, 1 number, and 1 symbol.</p>
 
-        {submitError ? <p className="text-sm text-red-600">{submitError}</p> : null}
+          {submitError ? <p className={authAlertClass}>{submitError}</p> : null}
 
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700"
-        >
-          Create Account
-        </button>
-      </form>
+          <button type="submit" className={authButtonClass}>
+            Create account
+          </button>
+        </form>
 
-      <p className="text-center text-sm text-zinc-600">
-        Already have an account?{" "}
-        <Link href="/login" className="font-medium text-zinc-900 underline-offset-4 hover:underline">
-          Sign in
-        </Link>
+        <p className="auth-switch">
+          Already have an account?{" "}
+          <Link href="/login" className={authLinkClass}>
+            Sign in
+          </Link>
+        </p>
+      </div>
+
+      <p className={authLegalClass}>
+        By clicking on &quot;Create account&quot; you agree to
+        <br />
+        <span className={authLinkClass}>Terms of Service</span>
+        {" | "}
+        <span className={authLinkClass}>Privacy Policy</span>
       </p>
     </div>
   );

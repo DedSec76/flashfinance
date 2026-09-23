@@ -5,15 +5,24 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import { isAuthenticated, setAuthenticated } from "@/components/auth/auth-guard";
-import { PageHeader } from "@/components/layout/page-header";
+import {
+  authAlertClass,
+  authButtonClass,
+  authErrorClass,
+  authInputClass,
+  authLabelClass,
+  authLegalClass,
+  authLinkClass,
+} from "@/components/auth/auth-classes";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
+  const [showResetHint, setShowResetHint] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [submitError, setSubmitError] = useState("");
 
@@ -64,11 +73,7 @@ export default function LoginPage() {
 
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
-
-    const nextErrors = {
-      email: emailError,
-      password: passwordError,
-    };
+    const nextErrors = { email: emailError, password: passwordError };
 
     setErrors(nextErrors);
 
@@ -83,73 +88,86 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <PageHeader title="Sign In" subtitle="Access your private finance workspace." />
+    <div className="auth-form-wrap">
+      <div>
+        <h2>Sign in</h2>
 
-      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-zinc-700">
-            Email
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <div className="auth-field">
+            <label htmlFor="email" className={authLabelClass}>
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (errors.email) {
+                  setErrors((current) => ({ ...current, email: validateEmail(event.target.value) }));
+                }
+              }}
+              className={authInputClass}
+              autoComplete="email"
+              aria-invalid={Boolean(errors.email)}
+            />
+            {errors.email ? <p className={authErrorClass}>{errors.email}</p> : null}
+          </div>
+
+          <div className="auth-field">
+            <label htmlFor="password" className={authLabelClass}>
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                if (errors.password) {
+                  setErrors((current) => ({ ...current, password: validatePassword(event.target.value) }));
+                }
+              }}
+              className={authInputClass}
+              autoComplete="current-password"
+              aria-invalid={Boolean(errors.password)}
+            />
+            {errors.password ? <p className={authErrorClass}>{errors.password}</p> : null}
+          </div>
+
+          <label className="auth-remember">
+            <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} />
+            Remember Me
           </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              if (errors.email) {
-                setErrors((current) => ({ ...current, email: validateEmail(event.target.value) }));
-              }
-            }}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-zinc-900 focus:ring-2 focus:ring-zinc-200"
-            placeholder="user.name@example.com"
-            autoComplete="email"
-            aria-invalid={Boolean(errors.email)}
-          />
-          {errors.email ? <p className="text-xs text-red-600">{errors.email}</p> : null}
-        </div>
 
-        <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              if (errors.password) {
-                setErrors((current) => ({ ...current, password: validatePassword(event.target.value) }));
-              }
-            }}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-zinc-900 focus:ring-2 focus:ring-zinc-200"
-            placeholder="At least 10 characters"
-            autoComplete="current-password"
-            aria-invalid={Boolean(errors.password)}
-          />
-          {errors.password ? <p className="text-xs text-red-600">{errors.password}</p> : null}
-        </div>
+          {submitError ? <p className={authAlertClass}>{submitError}</p> : null}
 
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
-          Password requirements: 10+ characters, 1 uppercase letter, 1 number, and 1 symbol.
-        </div>
+          <button type="submit" className={authButtonClass}>
+            Sign in now
+          </button>
+        </form>
 
-        {submitError ? <p className="text-sm text-red-600">{submitError}</p> : null}
-
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700"
-        >
-          Sign In
+        <button type="button" onClick={() => setShowResetHint(true)} className="auth-text-button">
+          Lost your password?
         </button>
-      </form>
+        {showResetHint ? (
+          <p className="auth-hint">Password reset is not available yet. Sign in with the password for this browser.</p>
+        ) : null}
 
-      <p className="text-center text-sm text-zinc-600">
-        Need an account?{" "}
-        <Link href="/register" className="font-medium text-zinc-900 underline-offset-4 hover:underline">
-          Create one
-        </Link>
+        <p className="auth-switch">
+          New here?{" "}
+          <Link href="/register" className={authLinkClass}>
+            Create an account
+          </Link>
+        </p>
+      </div>
+
+      <p className={authLegalClass}>
+        By clicking on &quot;Sign in now&quot; you agree to
+        <br />
+        <span className={authLinkClass}>Terms of Service</span>
+        {" | "}
+        <span className={authLinkClass}>Privacy Policy</span>
       </p>
     </div>
   );
