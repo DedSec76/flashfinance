@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ToastProvider } from "@/components/providers/toast-provider";
+import { ToastProvider } from "../components/providers/toast-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: "Flash Finance",
   description: "Personal finance management for income, expenses, and monthly balance tracking.",
 };

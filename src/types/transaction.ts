@@ -12,3 +12,17 @@ export interface Transaction {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export type CreateTransactionData = Omit<
+    Transaction,
+    "id" | "createdAt" | "updatedAt"
+>;
+
+export type updateTransactionData = Partial<
+    Omit<Transaction, "id" | "userId" | "createdAt" | "updatedAt">
+>;
+
+export type CreateTransactionInput = Omit<
+  CreateTransactionData,
+  "userId"
+>;
