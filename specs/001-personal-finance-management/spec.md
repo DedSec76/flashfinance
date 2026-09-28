@@ -199,3 +199,6 @@ another user's totals and profile remain inaccessible.
 - **SC-014**: At least 95% of valid filtered and paginated transaction queries return the expected records in date-descending order during acceptance testing.
 - **SC-015**: 100% of successful logins reset the consecutive failed-attempt counter.
 - **SC-016**: 100% of date-range filter queries include transactions exactly equal to the selected start date or end date.
+
+
+** Typography: Poppins will be used for headings and major visual elements, while Inter will be used for body text, forms, navigation, transaction data, and other interface content. This pairing provides a modern and professional appearance while maintaining readability across the application.
