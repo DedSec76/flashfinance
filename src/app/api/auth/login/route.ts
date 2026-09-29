@@ -1,6 +1,6 @@
-import { AppError } from "@/src/lib/errors/app-error";
-import { loginService } from "@/src/services/login/login.service";
-import { LoginSchema } from "@/src/validations/login.validation";
+import { AppError } from "@/lib/errors/app-error";
+import { loginService } from "@/services/login/login.service";
+import { LoginSchema } from "@/validations/login.validation";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 

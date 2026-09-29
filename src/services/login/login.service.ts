@@ -1,5 +1,5 @@
-import { AppError } from "@/src/lib/errors/app-error";
-import { findUserByEmail, incrementFailedLoginAttempts, lockUser, resetLoginAttempts } from "@/src/repositories/user.repository"
+import { AppError } from "@/lib/errors/app-error";
+import { findUserByEmail, incrementFailedLoginAttempts, lockUser, resetLoginAttempts } from "@/repositories/user.repository"
 import { createSessionService } from "../session/session.service";
 import bcrypt from "bcryptjs";
 
