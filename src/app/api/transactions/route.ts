@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import { AppError } from "@/src/lib/errors/app-error";
 import { getSessionByToken } from "@/src/services/session/session.service";
-import { createTransactionService } from "@/src/services/transaction/transaction.service";
+import { createTransactionService, getTransactionsService } from "@/src/services/transaction/transaction.service";
 import { transactionSchema } from "@/src/validations/transaction.validation";
 
 export async function POST(request: Request) {
@@ -66,5 +66,47 @@ export async function POST(request: Request) {
             },
             { status: 500 }
         )
+    }
+}
+
+export async function GET() {
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("sessionToken")?.value;
+
+        if (!token) {
+            throw new AppError(
+                "SESSION_INVALID",
+                "Authentication required.",
+                401
+            );
+        }
+
+        const userId = await getSessionByToken(token);
+        const transactions = await getTransactionsService(userId.toString());
+
+        return Response.json(transactions, { status: 200 });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return Response.json(
+                {
+                    error: {
+                        code: error.code,
+                        message: error.message,
+                    },
+                },
+                { status: error.statusCode }
+            );
+        }
+        console.error(error);
+        return Response.json(
+            {
+                error: {
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "An unexpected error occurred."
+                },
+            },
+            { status: 500 }
+        );
     }
 }

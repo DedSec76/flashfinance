@@ -1,6 +1,6 @@
 import { connectToDatabase } from "../lib/mongodb/connection";
 import { Transaction as TransactionModel } from "../lib/models/transaction.model";
-import type { CreateTransactionData, updateTransactionData } from "../types/transaction";
+import type { CreateTransactionData, UpdateTransactionData } from "../types/transaction";
 
 export async function createTransaction(data: CreateTransactionData) {
     await connectToDatabase();
@@ -8,24 +8,34 @@ export async function createTransaction(data: CreateTransactionData) {
     return await TransactionModel.create(data);
 }
 
-export async function findTransactionById(id: string) {
+export async function findTransactionsByUserId(userId: string) {
     await connectToDatabase();
 
-    return await TransactionModel.findById(id);
+    return TransactionModel.find({ userId }).sort({ date: -1, createdAt: -1 });
 }
 
-export async function updateTransaction(data: updateTransactionData, id: string) {
+export async function findTransactionByIdAndUserId(id: string, userId: string) {
     await connectToDatabase();
 
-    return TransactionModel.findByIdAndUpdate(
-        id, 
+    return TransactionModel.findOne({ _id: id, userId });
+}
+
+export async function updateTransaction(
+    data: UpdateTransactionData,
+    id: string,
+    userId: string
+) {
+    await connectToDatabase();
+
+    return TransactionModel.findOneAndUpdate(
+        { _id: id, userId },
         { $set: data },
         { new: true, runValidators: true }
     );
 }
 
-export async function deleteTransaction(id: string) {
+export async function deleteTransaction(id: string, userId: string) {
     await connectToDatabase();
 
-    return TransactionModel.findByIdAndDelete(id)
+    return TransactionModel.findOneAndDelete({ _id: id, userId });
 }
