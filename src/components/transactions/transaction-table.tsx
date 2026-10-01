@@ -1,8 +1,23 @@
 import { TransactionRowActions } from "@/src/components/transactions/transaction-row-actions";
 import { EmptyState } from "@/src/components/ui/empty-state";
 
-export function TransactionTable() {
-  const rows: Array<{ id: string; date: string; type: "income" | "expense"; amount: string; category: string }> = [];
+type TransactionRow = {
+  id: string;
+  date: string;
+  type: "income" | "expense";
+  amount: number;
+  category: string;
+};
+
+type TransactionTableProps = {
+  rows: TransactionRow[];
+};
+
+export function TransactionTable({ rows }: TransactionTableProps) {
+  const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 
   if (rows.length === 0) {
     return <EmptyState title="No transactions yet" description="Create your first income or expense record." />;
@@ -26,7 +41,7 @@ export function TransactionTable() {
               <td className="px-3 py-2">{row.date}</td>
               <td className="px-3 py-2 capitalize">{row.type}</td>
               <td className="px-3 py-2">{row.category}</td>
-              <td className="px-3 py-2">{row.amount}</td>
+              <td className="px-3 py-2">{currencyFormatter.format(row.amount)}</td>
               <td className="px-3 py-2">
                 <TransactionRowActions id={row.id} />
               </td>
