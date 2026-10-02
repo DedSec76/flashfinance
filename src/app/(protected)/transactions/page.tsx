@@ -1,7 +1,7 @@
-import { PageHeader } from "@/components/layout/page-header";
-import { TransactionFilterBar } from "@/components/transactions/transaction-filter-bar";
-import { TransactionTable } from "@/components/transactions/transaction-table";
-import { PaginationControls } from "@/components/ui/pagination-controls";
+import { PageHeader } from "@/src/components/layout/page-header";
+import { TransactionFilterBar } from "@/src/components/transactions/transaction-filter-bar";
+import { TransactionTable } from "@/src/components/transactions/transaction-table";
+import { PaginationControls } from "@/src/components/ui/pagination-controls";
 
 export default function TransactionsPage() {
   return (

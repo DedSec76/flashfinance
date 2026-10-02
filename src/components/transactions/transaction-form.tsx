@@ -1,4 +1,4 @@
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ConfirmDialog } from "@/src/components/ui/confirm-dialog";
 
 type TransactionFormProps = {
   mode: "create" | "edit";

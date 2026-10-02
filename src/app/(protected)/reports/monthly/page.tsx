@@ -1,6 +1,6 @@
-import { PageHeader } from "@/components/layout/page-header";
-import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart";
-import { MonthlySummaryPanel } from "@/components/reports/monthly-summary-panel";
+import { PageHeader } from "@/src/components/layout/page-header";
+import { CategoryBreakdownChart } from "@/src/components/reports/category-breakdown-chart";
+import { MonthlySummaryPanel } from "@/src/components/reports/monthly-summary-panel";
 
 export default function MonthlyReportsPage() {
   return (

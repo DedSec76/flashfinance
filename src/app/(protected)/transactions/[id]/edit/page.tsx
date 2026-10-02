@@ -1,5 +1,5 @@
-import { PageHeader } from "@/components/layout/page-header";
-import { TransactionForm } from "@/components/transactions/transaction-form";
+import { PageHeader } from "@/src/components/layout/page-header";
+import { TransactionForm } from "@/src/components/transactions/transaction-form";
 
 export default async function EditTransactionPage({
   params,

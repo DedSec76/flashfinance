@@ -1,6 +1,6 @@
-import { CategoryForm } from "@/components/categories/category-form";
-import { CategoryList } from "@/components/categories/category-list";
-import { PageHeader } from "@/components/layout/page-header";
+import { CategoryForm } from "@/src/components/categories/category-form";
+import { CategoryList } from "@/src/components/categories/category-list";
+import { PageHeader } from "@/src/components/layout/page-header";
 
 export default function CategoriesPage() {
   return (

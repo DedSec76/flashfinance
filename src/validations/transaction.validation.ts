@@ -30,5 +30,7 @@ export const transactionSchema = z.object({
     .date('The date must be a valid date.'),
 });
 
+export const updateTransactionSchema = transactionSchema.partial();
+
 // Extrae el tipo de TypeScript automáticamente a partir del schema de Zod
 export type TransactionInput = z.infer<typeof transactionSchema>;

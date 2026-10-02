@@ -1,4 +1,4 @@
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/src/components/ui/empty-state";
 
 export function CategoryList() {
   const categories: Array<{ id: string; name: string; type: "income" | "expense"; inUse: boolean }> = [];

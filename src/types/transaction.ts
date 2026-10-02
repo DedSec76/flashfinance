@@ -18,7 +18,7 @@ export type CreateTransactionData = Omit<
     "id" | "createdAt" | "updatedAt"
 >;
 
-export type updateTransactionData = Partial<
+export type UpdateTransactionData = Partial<
     Omit<Transaction, "id" | "userId" | "createdAt" | "updatedAt">
 >;
 
