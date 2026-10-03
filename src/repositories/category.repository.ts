@@ -9,3 +9,11 @@ export async function findCategoryByIdAndUserId(categoryId: string, userId: stri
         userId,
     })
 }
+
+export async function findCategoriesByUserId(userId: string) {
+    await connectToDatabase();
+
+    return Category.find({ userId })
+        .select({ _id: 1, name: 1, type: 1 })
+        .sort({ name: 1 });
+}
