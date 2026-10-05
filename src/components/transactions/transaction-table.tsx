@@ -1,11 +1,44 @@
 import { TransactionRowActions } from "@/src/components/transactions/transaction-row-actions";
 import { EmptyState } from "@/src/components/ui/empty-state";
 
-export function TransactionTable() {
-  const rows: Array<{ id: string; date: string; type: "income" | "expense"; amount: string; category: string }> = [];
+type TransactionRow = {
+  id: string;
+  date: string;
+  type: "income" | "expense";
+  amount: number;
+  category: string;
+};
+
+type TransactionTableProps = {
+  rows: TransactionRow[];
+  hasActiveFilters?: boolean;
+};
+
+export function TransactionTable({
+  rows,
+  hasActiveFilters = false,
+}: TransactionTableProps) {
+  const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
 
   if (rows.length === 0) {
-    return <EmptyState title="No transactions yet" description="Create your first income or expense record." />;
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          title="No matching transactions"
+          description="Nothing matches these filters. Widen the dates or amounts, or clear the filters to see every transaction."
+        />
+      );
+    }
+
+    return (
+      <EmptyState
+        title="No transactions yet"
+        description="Create your first income or expense record."
+      />
+    );
   }
 
   return (
@@ -26,7 +59,9 @@ export function TransactionTable() {
               <td className="px-3 py-2">{row.date}</td>
               <td className="px-3 py-2 capitalize">{row.type}</td>
               <td className="px-3 py-2">{row.category}</td>
-              <td className="px-3 py-2">{row.amount}</td>
+              <td className="px-3 py-2">
+                {currencyFormatter.format(row.amount)}
+              </td>
               <td className="px-3 py-2">
                 <TransactionRowActions id={row.id} />
               </td>
