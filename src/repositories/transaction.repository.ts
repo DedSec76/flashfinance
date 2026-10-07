@@ -14,6 +14,15 @@ export async function findTransactionsByUserId(userId: string) {
     return TransactionModel.find({ userId }).sort({ date: -1, createdAt: -1 });
 }
 
+export async function countTransactionsForCategory(
+    categoryId: string,
+    userId: string
+): Promise<number> {
+    await connectToDatabase();
+
+    return TransactionModel.countDocuments({ categoryId, userId });
+}
+
 export async function findTransactionByIdAndUserId(id: string, userId: string) {
     await connectToDatabase();
 
