@@ -228,8 +228,11 @@ export default function LoginPage() {
         </button>
         {showResetHint ? (
           <p className="auth-hint">
-            Password recovery is unavailable. Sign in with the password for your
-            account.
+            Contact the team and include the email on your account. They can
+            look up your account and help you recover access.{" "}
+            <Link href="/contact" className={authLinkClass}>
+              Contact the team
+            </Link>
           </p>
         ) : null}
 
