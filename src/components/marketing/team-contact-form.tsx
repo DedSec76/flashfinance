@@ -32,11 +32,29 @@ function validate(values: Record<Field, string>): FieldErrors {
 export function TeamContactForm() {
   const [values, setValues] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [status, setStatus] = useState<"idle" | "ready" | "unlisted">("idle");
+  const [status, setStatus] = useState<"idle" | "ready" | "unlisted" | "failed">("idle");
 
   function update(field: Field, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
     setStatus("idle");
+  }
+
+  async function handleMailToFailure(rawMessage: string) {
+    try {
+      await navigator.clipboard.writeText(rawMessage);
+      setStatus("failed");
+      setErrors((current) => ({
+        ...current,
+        message: "Your email app did not open. The message was copied to your clipboard instead.",
+      }));
+      return;
+    } catch {
+      setStatus("failed");
+      setErrors((current) => ({
+        ...current,
+        message: "Your email app did not open. Please copy the message manually and send it to the team email list.",
+      }));
+    }
   }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -56,10 +74,15 @@ export function TeamContactForm() {
 
     const subject = "Flash Finance — note for Team 2";
     const body = `Name: ${values.name.trim()}\nEmail: ${values.email.trim()}\n\n${values.message.trim()}`;
-    const href = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const gmailHref = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipients.join(","))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoHref = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-    window.location.href = href;
     setStatus("ready");
+    window.open(gmailHref, "_blank", "noopener,noreferrer");
+
+    window.setTimeout(() => {
+      window.location.href = mailtoHref;
+    }, 500);
   }
 
   return (
@@ -129,10 +152,12 @@ export function TeamContactForm() {
 
       <p className="future-form-status" role="status">
         {status === "ready"
-          ? "Your mail app is opening with this note addressed to every listed team email."
-          : status === "unlisted"
-            ? "The team email addresses are not listed yet, so this note cannot be delivered. You can still use each member’s links below."
-            : "One note goes to every team email that has been added."}
+          ? "Your email app is opening with the team message ready to send."
+          : status === "failed"
+            ? "The email app did not open. Please copy the message manually and send it to the team." 
+            : status === "unlisted"
+              ? "The team email addresses are not listed yet, so this note cannot be delivered. You can still use each member’s links below."
+              : "One note goes to every team email that has been added."}
       </p>
     </form>
   );

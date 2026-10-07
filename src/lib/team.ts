@@ -10,6 +10,13 @@ export type TeamMember = {
   contacts: TeamContacts;
 };
 
+/**
+ * General team contact email recipients for the contact form.
+ * This is intentionally email-based so external visitors can send a note to the team
+ * without joining an internal Teams channel.
+ */
+export const teamChannelUrl = "";
+
 const contactLabels: Record<ContactChannel, string> = {
   github: "GitHub",
   email: "Email",
@@ -28,7 +35,7 @@ export const teamMembers: TeamMember[] = [
     name: "Aldair Rutte Bazán",
     contacts: {
       github: "https://github.com/DedSec76/wdd430-portfolio",
-      email: "",
+      email: "abazan@byupathway.edu",
       linkedin: "",
       portfolio: "",
     },
@@ -38,7 +45,7 @@ export const teamMembers: TeamMember[] = [
     name: "Enoh Uwem Akpan",
     contacts: {
       github: "https://github.com/enohakpan/wdd430-portfolio",
-      email: "",
+      email: "eakpan11@byupathway.edu",
       linkedin: "",
       portfolio: "",
     },
@@ -48,7 +55,7 @@ export const teamMembers: TeamMember[] = [
     name: "Oluwaseyi Elujoba",
     contacts: {
       github: "https://github.com/oedesign/wdd430-portfolio",
-      email: "",
+      email: "oelujoba@byupathway.edu",
       linkedin: "",
       portfolio: "",
     },
@@ -75,7 +82,12 @@ export function contactSlots(member: TeamMember): ContactSlot[] {
       return { channel, label: contactLabels[channel], href: null };
     }
 
-    const href = channel === "email" && !value.startsWith("mailto:") ? `mailto:${value}` : value;
-    return { channel, label: contactLabels[channel], href };
+    if (channel === "email") {
+      const email = value.startsWith("mailto:") ? value.replace(/^mailto:/i, "") : value;
+      const href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`;
+      return { channel, label: contactLabels[channel], href };
+    }
+
+    return { channel, label: contactLabels[channel], href: value };
   });
 }
