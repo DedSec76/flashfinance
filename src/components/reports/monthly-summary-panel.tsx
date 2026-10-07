@@ -1,21 +1,36 @@
-export function MonthlySummaryPanel() {
+import { formatUsd } from "@/src/lib/money";
+import { StatCard } from "@/src/components/ui/stat-card";
+
+type MoneySummaryProps = {
+  title: string;
+  description?: string;
+  income: number;
+  expenses: number;
+  balance: number;
+};
+
+export function MoneySummary({
+  title,
+  description,
+  income,
+  expenses,
+  balance,
+}: MoneySummaryProps) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-5">
-      <h2 className="text-lg font-semibold text-zinc-900">Monthly Summary</h2>
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <SummaryItem label="Income" value="$0.00" />
-        <SummaryItem label="Expenses" value="$0.00" />
-        <SummaryItem label="Balance" value="$0.00" />
+    <section className="space-y-3">
+      <div>
+        <h2>{title}</h2>
+        {description ? <p className="text-muted">{description}</p> : null}
+      </div>
+      <div className="dashboard-grid">
+        <StatCard title="Income" value={formatUsd(income)} tone="income" />
+        <StatCard title="Expenses" value={formatUsd(expenses)} tone="expense" />
+        <StatCard
+          title="Balance"
+          value={formatUsd(balance)}
+          tone={balance < 0 ? "expense" : balance > 0 ? "income" : "neutral"}
+        />
       </div>
     </section>
-  );
-}
-
-function SummaryItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-zinc-200 p-3">
-      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-zinc-900">{value}</p>
-    </div>
   );
 }
