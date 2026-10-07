@@ -1,4 +1,5 @@
 import { AppError } from "@/src/lib/errors/app-error";
+import { countTransactionsForCategory } from "@/src/repositories/transaction.repository";
 import {
   createCategory,
   deleteCategory,
@@ -7,10 +8,6 @@ import {
   findCategoryByNormalizedName,
   updateCategory,
 } from "@/src/repositories/category.repository";
-import {
-  countTransactionsByCategory,
-  countTransactionsForCategory,
-} from "@/src/repositories/transaction.repository";
 import type {
   CreateCategoryInput,
   UpdateCategoryInput,
@@ -69,21 +66,28 @@ function toCategoryView(
   };
 }
 
-export async function listCategoriesService(userId: string) {
-  const [categories, counts] = await Promise.all([
-    findCategoriesByUserId(userId),
-    countTransactionsByCategory(userId),
-  ]);
+export async function listCategoriesService(userId: string): Promise<CategoryView[]> {
+  const categories = await findCategoriesByUserId(userId);
 
-  const countById = new Map(counts.map((row) => [String(row._id), row.count]));
+  return Promise.all(
+    categories.map(async (category) => {
+      const transactionCount = await countTransactionsForCategory(
+        String(category._id),
+        userId,
+      );
 
-  return categories.map((category) =>
-    toCategoryView(category, countById.get(String(category._id)) ?? 0),
+      return toCategoryView(category, transactionCount);
+    }),
   );
 }
 
 export async function createCategoryService(userId: string, input: CreateCategoryInput) {
   const name = input.name.trim();
+
+  if (!name) {
+    throw new AppError("VALIDATION_ERROR", "Category name is required.", 400);
+  }
+
   const normalizedName = normalizeCategoryName(name);
   const existing = await findCategoryByNormalizedName(userId, normalizedName);
 
