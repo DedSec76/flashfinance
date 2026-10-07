@@ -5,7 +5,6 @@ import { TransactionFilterBar } from "@/components/transactions/transaction-filt
 import { TransactionTable } from "@/components/transactions/transaction-table";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 
-export default function TransactionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader

@@ -1,0 +1,35 @@
+---
+description: FlashFinance data model and layered architecture
+alwaysApply: true
+---
+
+# Architecture
+
+Persist User, Session, Category, and Transaction with these relationships:
+
+- User 1:N Session, User 1:N Category, User 1:N Transaction
+- Transaction N:1 Category, and each transaction belongs to exactly one user
+- Categories are owned by one user. Never read or assign another user's category
+
+User fields: `_id`, `firstName`, `lastName`, `email`, `passwordHash`, `avatar`, `status`, `failedLoginAttempts`, `lockedUntil`, `createdAt`, `updatedAt`.
+
+Session fields: `_id`, `userId`, `deviceId`, `tokenHash`, `expiresAt`, `createdAt`, `lastUsedAt`.
+
+Category fields: `_id`, `name`, `normalizedName`, `type`, `userId`, `createdAt`, `updatedAt`.
+
+Transaction fields: `_id`, `title`, `amount`, `type`, `categoryId`, `description`, `date`, `userId`, `createdAt`, `updatedAt`.
+
+Call through layers in this order. Do not skip a layer or move its job upward.
+
+```ts
+// app/api/transactions/route.ts
+const input = createTransactionSchema.parse(await request.json());
+const transaction = await transactionService.create(userId, input);
+return Response.json(transaction);
+```
+
+- Route handler: HTTP, params, body, and auth context only. Call a service.
+- Validation: Zod for types, required fields, limits, formats, and enums.
+- Service: business rules, ownership, authorization, and whether the operation is allowed.
+- Repository: MongoDB queries, inserts, updates, and deletes only.
+- MongoDB is the source of truth.

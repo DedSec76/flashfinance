@@ -1,7 +1,7 @@
-import { PageHeader } from "@/components/layout/page-header";
-import { PasswordChangeForm } from "@/components/profile/password-change-form";
-import { ProfileForm } from "@/components/profile/profile-form";
-import { SessionActions } from "@/components/profile/session-actions";
+import { PageHeader } from "@/src/components/layout/page-header";
+import { PasswordChangeForm } from "@/src/components/profile/password-change-form";
+import { ProfileForm } from "@/src/components/profile/profile-form";
+import { SessionActions } from "@/src/components/profile/session-actions";
 
 export default function ProfilePage() {
   return (

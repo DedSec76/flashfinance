@@ -35,6 +35,7 @@ export async function POST(request: Request) {
                 { status: error.statusCode }
             );
         }
+        console.error(error);
 
         return Response.json(
             {

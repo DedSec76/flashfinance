@@ -1,5 +1,5 @@
-import { TransactionRowActions } from "@/components/transactions/transaction-row-actions";
-import { EmptyState } from "@/components/ui/empty-state";
+import { TransactionRowActions } from "@/src/components/transactions/transaction-row-actions";
+import { EmptyState } from "@/src/components/ui/empty-state";
 
 export type TransactionTableRow = {
   id: string;

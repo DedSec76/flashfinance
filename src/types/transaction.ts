@@ -18,7 +18,7 @@ export type CreateTransactionData = Omit<
     "id" | "createdAt" | "updatedAt"
 >;
 
-export type updateTransactionData = Partial<
+export type UpdateTransactionData = Partial<
     Omit<Transaction, "id" | "userId" | "createdAt" | "updatedAt">
 >;
 
@@ -26,3 +26,25 @@ export type CreateTransactionInput = Omit<
   CreateTransactionData,
   "userId"
 >;
+
+export type TransactionFilters = {
+    type?: TransactionType;
+    categoryId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    month?: string;
+    minAmount?: number;
+    maxAmount?: number;
+    page: number;
+    limit: number;
+};
+
+export type PaginatedTransactionsResult<T = Transaction> = {
+    items: T[];
+    pagination: {
+        page: number;
+        limit: number;
+        totalItems: number;
+        totalPages: number;
+    };
+};

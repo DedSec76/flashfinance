@@ -1,0 +1,27 @@
+---
+description: FlashFinance color, type, and layout conventions
+alwaysApply: true
+---
+
+# Design
+
+Use the tokens in `app/globals.css`. Do not add one-off hex colors in components.
+
+- Primary: dark navy, for navigation and main buttons
+- Secondary: green, for positive money such as income and gains
+- Accent: light blue, for highlights and active navigation
+- Background: white and very light gray
+- Error: red, for errors and negative money such as expenses
+- Text: dark gray; headings use the navy heading token
+
+Typography is the loaded sans-serif:
+
+- Headings: bold and large
+- Section titles: medium to bold
+- Body: regular
+- Labels: medium
+- Financial values: larger than surrounding text and emphasized
+
+Keep spacing on the existing scale. Dashboard screens stack in this order: navigation, balance summary, filters, then the transaction list.
+
+Forms share label, input, validation message, button, and spacing styles. Every screen needs a clear loading, empty, invalid, and error state. Layouts must stay readable on narrow screens.
