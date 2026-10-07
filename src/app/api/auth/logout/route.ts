@@ -1,5 +1,5 @@
-import { AppError } from "@/src/lib/errors/app-error";
-import { logoutService } from "@/src/services/logout/logout.service";
+import { AppError } from "@/lib/errors/app-error";
+import { logoutService } from "@/services/logout/logout.service";
 import { cookies } from "next/headers";
 
 export async function POST(request: Request) {

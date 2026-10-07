@@ -1,8 +1,5 @@
 import { AppError } from "@/src/lib/errors/app-error";
-import {
-    findCategoriesByUserId,
-    findCategoryByIdAndUserId,
-} from "@/src/repositories/category.repository";
+import { findCategoryByIdAndUserId } from "@/src/repositories/category.repository";
 import {
     createTransaction,
     deleteTransaction,
@@ -12,7 +9,6 @@ import {
 } from "@/src/repositories/transaction.repository";
 import type {
     CreateTransactionInput,
-    TransactionFilters,
     UpdateTransactionData,
 } from "@/src/types/transaction";
 
@@ -78,19 +74,10 @@ export async function createTransactionService(userId: string, data: CreateTrans
     return createTransaction({...data, userId});
 }
 
-export async function getTransactionsService(
-    userId: string,
-    filters: TransactionFilters
-) {
+export async function getTransactionsService(userId: string) {
     ensureAuthenticated(userId);
 
-    return findTransactionsByUserId(userId, filters);
-}
-
-export async function getTransactionFilterCategoriesService(userId: string) {
-    ensureAuthenticated(userId);
-
-    return findCategoriesByUserId(userId);
+    return findTransactionsByUserId(userId);
 }
 
 export async function getTransactionByIdService(id: string, userId: string) {

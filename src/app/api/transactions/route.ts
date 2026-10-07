@@ -3,17 +3,7 @@ import { cookies } from "next/headers";
 import { AppError } from "@/src/lib/errors/app-error";
 import { getSessionByToken } from "@/src/services/session/session.service";
 import { createTransactionService, getTransactionsService } from "@/src/services/transaction/transaction.service";
-import { transactionFiltersSchema, transactionSchema } from "@/src/validations/transaction.validation";
-
-function toOptionalValue(value: string | null) {
-    if (value === null) {
-        return undefined;
-    }
-
-    const normalizedValue = value.trim();
-
-    return normalizedValue.length === 0 ? undefined : normalizedValue;
-}
+import { transactionSchema } from "@/src/validations/transaction.validation";
 
 export async function POST(request: Request) {
     try {
@@ -79,36 +69,8 @@ export async function POST(request: Request) {
     }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
     try {
-        const { searchParams } = new URL(request.url);
-        const filtersRaw = {
-            type: toOptionalValue(searchParams.get("type")),
-            categoryId: toOptionalValue(searchParams.get("categoryId")),
-            startDate: toOptionalValue(searchParams.get("startDate")),
-            endDate: toOptionalValue(searchParams.get("endDate")),
-            month: toOptionalValue(searchParams.get("month")),
-            minAmount: toOptionalValue(searchParams.get("minAmount")),
-            maxAmount: toOptionalValue(searchParams.get("maxAmount")),
-            page: toOptionalValue(searchParams.get("page")) ?? "1",
-            limit: toOptionalValue(searchParams.get("limit")) ?? "10",
-        };
-
-        const filtersResult = transactionFiltersSchema.safeParse(filtersRaw);
-
-        if (!filtersResult.success) {
-            return Response.json(
-                {
-                    error: {
-                        code: "VALIDATION_ERROR",
-                        message: "Invalid request data.",
-                        fields: filtersResult.error.flatten().fieldErrors,
-                    },
-                },
-                { status: 400 }
-            );
-        }
-
         const cookieStore = await cookies();
         const token = cookieStore.get("sessionToken")?.value;
 
@@ -121,10 +83,7 @@ export async function GET(request: Request) {
         }
 
         const userId = await getSessionByToken(token);
-        const transactions = await getTransactionsService(
-            userId.toString(),
-            filtersResult.data
-        );
+        const transactions = await getTransactionsService(userId.toString());
 
         return Response.json(transactions, { status: 200 });
     } catch (error) {
