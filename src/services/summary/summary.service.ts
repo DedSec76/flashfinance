@@ -1,10 +1,10 @@
 import { roundMoney } from "@/src/lib/money";
 import { findCategoriesByUserId } from "@/src/repositories/category.repository";
-/* import {
+import {
   sumTransactionsByCategory,
   sumTransactionsByType,
 } from "@/src/repositories/transaction.repository";
- */
+
 export type SummaryCategory = {
   id: string;
   name: string;
@@ -38,8 +38,8 @@ export async function getFinancialSummary(
 ): Promise<FinancialSummary> {
   const range = options?.month ? monthRange(options.month) : undefined;
   const [typeTotals, categoryTotals, categories] = await Promise.all([
-    /* sumTransactionsByType(userId, range),
-    sumTransactionsByCategory(userId, range), */
+    sumTransactionsByType(userId, range),
+    sumTransactionsByCategory(userId, range),
     findCategoriesByUserId(userId),
   ]);
 

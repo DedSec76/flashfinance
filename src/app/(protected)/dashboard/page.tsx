@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart";
-import { MoneySummary } from "@/components/reports/monthly-summary-panel";
+import { MonthlySummaryPanel } from "@/components/reports/monthly-summary-panel";
 import {
   TransactionTable,
   type TransactionTableRow,
@@ -147,9 +147,9 @@ export default async function DashboardPage({
 
       <TransactionTable rows={tableRows} />
 
-      <MoneySummary title="expense del dia" description="expense que se paso del limite" income={200} expenses={500} balance={800} />
+      <MonthlySummaryPanel />
 
-      <CategoryBreakdownChart title="cateoria breakdown" categories={["groseries","candies"]}/>
+      <CategoryBreakdownChart />
     </div>
   );
 }

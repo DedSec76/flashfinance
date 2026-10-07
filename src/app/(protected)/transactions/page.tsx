@@ -5,8 +5,6 @@ import { TransactionFilterBar } from "@/components/transactions/transaction-filt
 import { TransactionTable } from "@/components/transactions/transaction-table";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 
-export default function TransactionPage() {
-  
   return (
     <div className="space-y-6">
       <PageHeader
@@ -26,7 +24,7 @@ export default function TransactionPage() {
 
       <TransactionTable rows={[]} />
 
-      <PaginationControls currentPage={1} totalPages={1} getPageHref={() => getPageHref(12)}/>
+      <PaginationControls currentPage={1} totalPages={1} />
     </div>
   );
 }
