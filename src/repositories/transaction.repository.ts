@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import { connectToDatabase } from "../lib/mongodb/connection";
 import { Transaction as TransactionModel } from "../lib/models/transaction.model";
 import type {
@@ -141,4 +143,75 @@ export async function deleteTransaction(id: string, userId: string) {
     await connectToDatabase();
 
     return TransactionModel.findOneAndDelete({ _id: id, userId });
+}
+
+export async function countTransactionsForCategory(categoryId: string, userId: string) {
+    await connectToDatabase();
+
+    return TransactionModel.countDocuments({ categoryId, userId });
+}
+
+export async function countTransactionsByCategory(userId: string) {
+    await connectToDatabase();
+
+    return TransactionModel.aggregate<{ _id: mongoose.Types.ObjectId; count: number }>([
+        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+        { $group: { _id: "$categoryId", count: { $sum: 1 } } },
+    ]);
+}
+
+export async function sumTransactionsByType(
+    userId: string,
+    range?: { start: Date; end: Date },
+) {
+    await connectToDatabase();
+
+    const match: {
+        userId: mongoose.Types.ObjectId;
+        date?: { $gte: Date; $lte: Date };
+    } = {
+        userId: new mongoose.Types.ObjectId(userId),
+    };
+
+    if (range) {
+        match.date = { $gte: range.start, $lte: range.end };
+    }
+
+    return TransactionModel.aggregate<{ _id: "income" | "expense"; total: number }>([
+        { $match: match },
+        {
+            $group: {
+                _id: "$type",
+                total: { $sum: { $toDouble: "$amount" } },
+            },
+        },
+    ]);
+}
+
+export async function sumTransactionsByCategory(
+    userId: string,
+    range?: { start: Date; end: Date },
+) {
+    await connectToDatabase();
+
+    const match: {
+        userId: mongoose.Types.ObjectId;
+        date?: { $gte: Date; $lte: Date };
+    } = {
+        userId: new mongoose.Types.ObjectId(userId),
+    };
+
+    if (range) {
+        match.date = { $gte: range.start, $lte: range.end };
+    }
+
+    return TransactionModel.aggregate<{ _id: mongoose.Types.ObjectId; total: number }>([
+        { $match: match },
+        {
+            $group: {
+                _id: "$categoryId",
+                total: { $sum: { $toDouble: "$amount" } },
+            },
+        },
+    ]);
 }
