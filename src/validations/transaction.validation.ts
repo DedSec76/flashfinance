@@ -106,5 +106,15 @@ export const transactionFiltersSchema = z
     },
   );
 
-// Extrae el tipo de TypeScript automáticamente a partir del schema de Zod
+export const transactionSummarySchema = z.object({
+  month: z
+    .string()
+    .regex(
+      /^\d{4}-(0[1-9]|1[0-2])$/,
+      "Enter a month like 2026-09.",
+    ),
+})
+
+export type TransactionSummaryInput = z.infer<typeof transactionSummarySchema>;
+
 export type TransactionInput = z.infer<typeof transactionSchema>;
