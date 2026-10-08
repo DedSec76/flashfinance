@@ -115,6 +115,7 @@ export async function updateTransactionService(
     }
 
     const date = data.date ?? existingTransaction.date;
+    
     if (date > new Date()) {
         throw new AppError(
             "INVALID_DATE",
@@ -123,28 +124,27 @@ export async function updateTransactionService(
         );
     }
 
-    if (data.categoryId || data.type) {
-        const categoryId = data.categoryId ?? existingTransaction.categoryId.toString();
+    
+    const categoryId = data.categoryId ?? existingTransaction.categoryId.toString();
         
-        const category = await findCategoryByIdAndUserId(categoryId, userId);
+    const type = data.type ?? existingTransaction.type;
 
-        if (!category) {
-            throw new AppError(
-                "CATEGORY_NOT_FOUND",
-                "Category not found.",
-                404
-            );
-        }
+    const category = await findCategoryByIdAndUserId(categoryId, userId);
 
-        const type = data.type ?? existingTransaction.type;
-        
-        if (type !== category.type) {
-            throw new AppError(
-                "TRANSACTION_TYPE_MISMATCH",
-                "Transaction type doesn't match category type.",
-                400
-            );
-        }
+    if (!category) {
+        throw new AppError(
+            "CATEGORY_NOT_FOUND",
+            "Category not found.",
+            404
+        );
+    }
+
+    if (type !== category.type) {
+        throw new AppError(
+            "TRANSACTION_TYPE_MISMATCH",
+            "Transaction type doesn't match category type.",
+            400
+        );
     }
 
     const transaction = await updateTransaction(data, id, userId);
