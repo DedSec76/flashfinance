@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart";
-import { MonthlySummaryPanel } from "@/components/reports/monthly-summary-panel";
+//import { MonthlySummaryPanel } from "@/components/reports/monthly-summary-panel";
 import {
   TransactionTable,
   type TransactionTableRow,
