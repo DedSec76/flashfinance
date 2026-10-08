@@ -23,7 +23,8 @@ export const transactionSchema = z.object({
   description: z
     .string()
     .max(1000, 'The description cannot exceed 1,000 characters.')
-    .nullable(),
+    .nullable()
+    .optional(),
     
   date: z
     .coerce // Convierte automáticamente strings de fecha (ej: '2026-09-27') a objetos Date de JS
@@ -114,6 +115,10 @@ export const transactionSummarySchema = z.object({
       "Enter a month like 2026-09.",
     ),
 })
+
+export const transactionIdSchema = z 
+  .string()
+  .regex(/^[0-9a-fA-F]{24}$/, "Invalid transaction.")
 
 export type TransactionSummaryInput = z.infer<typeof transactionSummarySchema>;
 
