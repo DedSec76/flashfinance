@@ -1,16 +1,7 @@
 import { AppError } from "@/src/lib/errors/app-error";
 import { findCategoryByIdAndUserId } from "@/src/repositories/category.repository";
-import {
-    createTransaction,
-    deleteTransaction,
-    findTransactionByIdAndUserId,
-    findTransactionsByUserId,
-    updateTransaction,
-} from "@/src/repositories/transaction.repository";
-import type {
-    CreateTransactionInput,
-    UpdateTransactionData,
-} from "@/src/types/transaction";
+import { createTransaction, deleteTransaction, findTransactionByIdAndUserId, findTransactionsByUserId, getMonthlyTransactionSummary, updateTransaction } from "@/src/repositories/transaction.repository";
+import type { CreateTransactionInput, UpdateTransactionData } from "@/src/types/transaction";
 
 function ensureAuthenticated(userId: string) {
     if (!userId) {
@@ -166,4 +157,47 @@ export async function deleteTransactionService(id: string, userId: string) {
     }
 
     return transaction;
+}
+
+export async function getMonthlyTransactionSummaryService(userId: string, month: string) {
+    if (!userId) {
+        throw new AppError(
+            "SESSION_INVALID",
+            "User is not authenticated.",
+            401,
+        );
+    }
+
+    const [yearString, monthString] = month.split("-");
+
+    const year = Number(yearString);
+    const monthNumber = Number(monthString);
+
+    const startDate = new Date(year, monthNumber - 1, 1);
+    const endDate = new Date(year, monthNumber, 1);
+
+    const summary = await getMonthlyTransactionSummary(userId, startDate, endDate);
+
+    let income = 0;
+    let expense = 0;
+
+    for (const item of summary) {
+        const total = Number(item.total.toString());
+
+        if (item._id === "income") {
+            income = total;
+        }
+
+        if (item._id === "expense") {
+            expense = total;
+        }
+    }
+
+    return {
+        year,
+        month: monthNumber,
+        income,
+        expense,
+        balance: income - expense,
+    };
 }
