@@ -5,7 +5,7 @@ export default function NewTransactionPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="New Transaction" subtitle="Add a new income or expense entry." />
-      <TransactionForm mode="create" />
+      <TransactionForm mode="create" returnTo="/transactions" />
     </div>
   );
 }

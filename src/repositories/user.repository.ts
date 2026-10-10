@@ -59,3 +59,76 @@ export async function resetLoginAttempts(userId: string) {
         }
     )
 }
+
+export async function registerFailedLoginAttempt(userId: string) {
+    await connectToDatabase();
+
+    const now = new Date();
+    const lockedUntil = new Date(now.getTime() + 10 * 60 * 1000);
+
+    const user = await UserModel.findOneAndUpdate(
+        {
+            _id: userId,
+            status: "active",
+            $or: [
+                { lockedUntil: null },
+                { lockedUntil: { $exists: false } },
+                { lockedUntil: { $lte: now } },
+            ],
+        },
+        [
+            {
+                $set: {
+                    failedLoginAttempts: {
+                        $add: [
+                            {
+                                $cond: [
+                                    {
+                                        $and: [
+                                            { $ne: [{ $isNull: ["$lockedUntil", null] }, null] },
+                                            { $lte: ["$lockedUntil", now] },
+                                        ],
+                                    },
+                                    0,
+                                    { $ifNull: ["$failedLoginAttempts", 0] },
+                                ],
+                            },
+                            1,
+                        ],
+                    },
+                },
+            },
+            {
+                $set: {
+                    lockedUntil: {
+                        $cond: [
+                            { $gte: ["$failedLoginAttempts", 3] },
+                            lockedUntil,
+                            null
+                        ],
+                    },
+                },
+            },
+        ],
+        { returnDocument: "after" },
+    );
+
+    if (!user) {
+        return { 
+            locked: true,
+            attemptsLeft: 0,
+            lockedUntil: null, 
+        };
+    }
+
+    const isLocked = 
+        user.lockedUntil !== null &&
+        user.lockedUntil !== undefined &&
+        user.lockedUntil > now;
+
+    return { 
+        locked: isLocked,
+        attemptsLeft: Math.max(0, 3 - user.failedLoginAttempts),
+        lockedUntil: isLocked ? user.lockedUntil : null,
+    };
+}

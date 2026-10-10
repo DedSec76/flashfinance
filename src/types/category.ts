@@ -7,3 +7,10 @@ export interface Category {
     type: CategoryType;
     userId: string;
 }
+
+export type CategoryFilter = {
+    _id?: string;
+    id?: string;
+    name: string;
+    type: CategoryType;
+}

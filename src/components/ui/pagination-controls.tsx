@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type PaginationControlsProps = {
   currentPage: number;
   totalPages: number;
@@ -16,20 +18,22 @@ export function PaginationControls({ currentPage, totalPages, getPageHref }: Pag
         Page {currentPage} of {totalPages}
       </span>
       <div className="flex gap-2">
-        <a
+        <Link
           href={getPageHref(previousPage)}
           aria-disabled={isPreviousDisabled}
+          tabIndex={isPreviousDisabled ? -1 : 0}
           className="rounded-md border border-zinc-300 px-2 py-1 aria-disabled:pointer-events-none aria-disabled:opacity-50"
         >
           Previous
-        </a>
-        <a
+        </Link>
+        <Link
           href={getPageHref(nextPage)}
           aria-disabled={isNextDisabled}
+          tabIndex={isNextDisabled ? -1 : 0}
           className="rounded-md border border-zinc-300 px-2 py-1 aria-disabled:pointer-events-none aria-disabled:opacity-50"
         >
           Next
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import { AppError } from "@/src/lib/errors/app-error";
 import { findCategoryByIdAndUserId } from "@/src/repositories/category.repository";
 import { createTransaction, deleteTransaction, findTransactionsByUserIdWithFilters, findTransactionByIdAndUserId, getMonthlyTransactionSummary, updateTransaction } from "@/src/repositories/transaction.repository";
-import type { TransactionFilters, CreateTransactionInput, UpdateTransactionData } from "@/src/types/transaction";
-import { transactionIdSchema } from "@/validations/transaction.validation";
+import type { TransactionFilters, UpdateTransactionData } from "@/src/types/transaction";
+import { transactionIdSchema, type TransactionInput } from "@/validations/transaction.validation";
 
 function assertTransactionId(id: string) {
     const result = transactionIdSchema.safeParse(id);
@@ -34,7 +34,7 @@ function throwTransactionNotFound() {
     );
 }
 
-export async function createTransactionService(userId: string, data: CreateTransactionInput) {
+export async function createTransactionService(userId: string, data: TransactionInput) {
     ensureAuthenticated(userId);
 
     // categoría existe categoría pertenece al usuario 
