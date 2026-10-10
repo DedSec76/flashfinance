@@ -148,7 +148,10 @@ export async function deleteTransaction(id: string, userId: string) {
 export async function countTransactionsForCategory(categoryId: string, userId: string) {
     await connectToDatabase();
 
-    return TransactionModel.countDocuments({ categoryId, userId });
+    return TransactionModel.countDocuments({
+        categoryId: new mongoose.Types.ObjectId(categoryId),
+        userId: new mongoose.Types.ObjectId(userId),
+    });
 }
 
 export async function countTransactionsByCategory(userId: string) {
