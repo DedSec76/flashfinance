@@ -15,15 +15,6 @@ type DashboardPageProps = {
   }>;
 };
 
-type DashboardTransaction = {
-  id: string;
-  title: string;
-  date: Date;
-  type: "income" | "expense";
-  amount: unknown;
-  categoryId: string;
-};
-
 function getAmount(value: unknown): number {
   if (typeof value === "number") {
     return value;
@@ -51,7 +42,7 @@ export default async function DashboardPage({
   const params = await searchParams;
   const selectedMonth = params.month;
 
-  let transactions: DashboardTransaction[] = [];
+  let transactions: Awaited<ReturnType<typeof getTransactionsService>>["data"] = [];
 
   let userId: string;
 
@@ -89,7 +80,7 @@ export default async function DashboardPage({
       date: new Date(transaction.date).toLocaleDateString(),
       type: transaction.type,
       amount: formatCurrency(getAmount(transaction.amount)),
-      category: String(transaction.categoryId),
+      category: transaction.categoryId?.name ?? "Uncategorized",
     }),
   );
 

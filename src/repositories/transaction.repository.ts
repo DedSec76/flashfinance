@@ -3,6 +3,7 @@ import { Transaction as TransactionModel } from "../lib/models/transaction.model
 import type { CreateTransactionData, TransactionFilters, UpdateTransactionData } from "../types/transaction";
 import { Types } from "mongoose";
 import { SummaryDateRange } from "@/types/summary";
+import { PopulatedCategory } from "@/types/category";
 
 export async function createTransaction(data: CreateTransactionData) {
     await connectToDatabase();
@@ -13,7 +14,9 @@ export async function createTransaction(data: CreateTransactionData) {
 export async function findTransactionsByUserId(userId: string) {
     await connectToDatabase();
 
-    return TransactionModel.find({ userId }).sort({ date: -1, createdAt: -1 });
+    return TransactionModel.find({ userId })
+        .populate<{ categoryId: PopulatedCategory | null }>("categoryId", "name")
+        .sort({ date: -1, createdAt: -1 });
 }
 
 export async function findTransactionsByUserIdWithFilters(userId: string, filters: TransactionFilters) {
@@ -61,6 +64,7 @@ export async function findTransactionsByUserIdWithFilters(userId: string, filter
 
     const [transactions, total] = await Promise.all([
         TransactionModel.find(query)
+            .populate<{ categoryId: PopulatedCategory | null }>("categoryId", "name")
             .sort({ date: -1, createdAt: -1 })
             .skip(skip)
             .limit(filters.limit),

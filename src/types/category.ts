@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 export type CategoryType = "income" | "expense";
 
 export interface Category {
@@ -14,3 +16,8 @@ export type CategoryFilter = {
     name: string;
     type: CategoryType;
 }
+
+export type PopulatedCategory = {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+};

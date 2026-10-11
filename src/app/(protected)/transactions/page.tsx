@@ -113,7 +113,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
     date: new Date(transaction.date).toLocaleDateString(),
     type: transaction.type,
     amount: `$${getAmount(transaction.amount).toFixed(2)}`,
-    category: String(transaction.categoryId),
+    category: transaction.categoryId?.name ?? "Uncategorized",
   }));
 
   return (
