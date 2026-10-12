@@ -1,153 +1,67 @@
-import { cookies } from "next/headers";
-
-import { AppError } from "@/src/lib/errors/app-error";
-import { getSessionByToken } from "@/src/services/session/session.service";
 import { createTransactionService, getTransactionsService } from "@/src/services/transaction/transaction.service";
 import { transactionFiltersSchema, transactionSchema } from "@/src/validations/transaction.validation";
-
-function toOptionalValue(value: string | null) {
-    if (value === null) {
-        return undefined;
-    }
-
-    const normalizedValue = value.trim();
-
-    return normalizedValue.length === 0 ? undefined : normalizedValue;
-}
+import { errorResponse, validationError } from "@/lib/http/error-response";
+import { getCurrentUserId } from "@/lib/auth/current-user";
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        const body = await request.json().catch(() => null);
 
         const result = transactionSchema.safeParse(body);
 
         if (!result.success) {
-            return Response.json(
-                {
-                    error: {
-                        code: "VALIDATION_ERROR",
-                        message: "Invalid request data.",
-                        fields: result.error.flatten().fieldErrors,
-                    },
-                },
-                { status: 400 }
-            )
-        }
+            const flattened = result.error.flatten();
 
-        // Get Cookie
-        const cookieStore = await cookies();
-        const token = cookieStore.get("sessionToken")?.value;
-
-        if (!token) {
-            throw new AppError(
-                "SESSION_INVALID",
-                "Authentication required.",
-                401
+            return validationError(
+                flattened.fieldErrors,
+                flattened.formErrors[0] ?? "Invalid request data.",
             );
         }
-        
-        // Get UserId from Session
-        const userId = await getSessionByToken(token);
 
-        // Create Transaction
-        const transaction = await createTransactionService(userId.toString(), result.data);
-            
+        const userId = await getCurrentUserId();
+
+        const transaction = await createTransactionService(userId, result.data);
+
         // Response
         return Response.json(transaction, { status: 201 });
     } catch (error) {
-        if (error instanceof AppError) {
-            return Response.json(
-                {
-                    error: {
-                        code: error.code,
-                        message: error.message,
-                    },
-                },
-                { status: error.statusCode }
-            );
-        }
-
-        return Response.json(
-            {
-                error: {
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "An unexpected error occurred."
-                },
-            },
-            { status: 500 }
-        )
+        return errorResponse(error);
     }
 }
 
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const filtersRaw = {
-            type: toOptionalValue(searchParams.get("type")),
-            categoryId: toOptionalValue(searchParams.get("categoryId")),
-            startDate: toOptionalValue(searchParams.get("startDate")),
-            endDate: toOptionalValue(searchParams.get("endDate")),
-            month: toOptionalValue(searchParams.get("month")),
-            minAmount: toOptionalValue(searchParams.get("minAmount")),
-            maxAmount: toOptionalValue(searchParams.get("maxAmount")),
-            page: toOptionalValue(searchParams.get("page")) ?? "1",
-            limit: toOptionalValue(searchParams.get("limit")) ?? "10",
-        };
 
-        const filtersResult = transactionFiltersSchema.safeParse(filtersRaw);
-
-        if (!filtersResult.success) {
-            return Response.json(
-                {
-                    error: {
-                        code: "VALIDATION_ERROR",
-                        message: "Invalid request data.",
-                        fields: filtersResult.error.flatten().fieldErrors,
-                    },
-                },
-                { status: 400 }
-            );
+        const filters = {
+            type: searchParams.get("type") ?? undefined,
+            categoryId: searchParams.get("categoryId") ?? undefined,
+            startDate: searchParams.get("startDate") ?? undefined,
+            endDate: searchParams.get("endDate") ?? undefined,
+            month: searchParams.get("month") ?? undefined,
+            minAmount: searchParams.get("minAmount") ?? undefined,
+            maxAmount: searchParams.get("maxAmount") ?? undefined,
+            page: searchParams.get("page") ?? undefined,
+            limit: searchParams.get("limit") ?? undefined,
         }
 
-        const cookieStore = await cookies();
-        const token = cookieStore.get("sessionToken")?.value;
+        const result = transactionFiltersSchema.safeParse(filters);
 
-        if (!token) {
-            throw new AppError(
-                "SESSION_INVALID",
-                "Authentication required.",
-                401
-            );
+        if (!result.success) {
+            const flattened = result.error.flatten();
+
+            return validationError(
+                flattened.fieldErrors,
+                flattened.formErrors[0] ?? "Invalid request data."
+            )
         }
 
-        const userId = await getSessionByToken(token);
-        const transactions = await getTransactionsService(
-            userId.toString(),
-            filtersResult.data
-        );
+        const userId = await getCurrentUserId();
+        
+        const transactions = await getTransactionsService(userId, result.data);
 
-        return Response.json(transactions, { status: 200 });
+        return Response.json(transactions);
     } catch (error) {
-        if (error instanceof AppError) {
-            return Response.json(
-                {
-                    error: {
-                        code: error.code,
-                        message: error.message,
-                    },
-                },
-                { status: error.statusCode }
-            );
-        }
-        console.error(error);
-        return Response.json(
-            {
-                error: {
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "An unexpected error occurred."
-                },
-            },
-            { status: 500 }
-        );
+        return errorResponse(error);
     }
 }

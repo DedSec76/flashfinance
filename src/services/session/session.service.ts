@@ -1,7 +1,7 @@
-import { createSession, findSessionByTokenHash } from "@/src/repositories/session.repository"
-import { findUserById } from "@/src/repositories/user.repository";
-import { generateToken, hashSessionToken } from "@/src/lib/auth/session";
-import { AppError } from "@/src/lib/errors/app-error";
+import { createSession, findSessionByTokenHash } from "@/repositories/session.repository"
+import { findUserById } from "@/repositories/user.repository";
+import { generateToken, hashSessionToken } from "@/lib/auth/session";
+import { AppError } from "@/lib/errors/app-error";
 
 export async function getSessionByToken(token: string) {
     const tokenHash = hashSessionToken(token);

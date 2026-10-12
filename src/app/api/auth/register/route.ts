@@ -1,6 +1,6 @@
-import { AppError } from "@/src/lib/errors/app-error";
-import { registerService } from "@/src/services/register/register.service";
-import { RegisterSchema } from "@/src/validations/register.validation";
+import { AppError } from "@/lib/errors/app-error";
+import { registerService } from "@/services/register/register.service";
+import { RegisterSchema } from "@/validations/register.validation";
 
 export async function POST(request: Request) {
     try {

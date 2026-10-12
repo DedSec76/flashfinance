@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
-import { AppError } from "@/src/lib/errors/app-error";
-import { getUserBySessionToken } from "@/src/services/session/session.service";
+import { AppError } from "@/lib/errors/app-error";
+import { getUserBySessionToken } from "@/services/session/session.service";
 
 export async function GET() {
 	try {

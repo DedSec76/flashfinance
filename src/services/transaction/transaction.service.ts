@@ -1,20 +1,20 @@
 import { AppError } from "@/src/lib/errors/app-error";
-import {
-    findCategoriesByUserId,
-    findCategoryByIdAndUserId,
-} from "@/src/repositories/category.repository";
-import {
-    createTransaction,
-    deleteTransaction,
-    findTransactionByIdAndUserId,
-    findTransactionsByUserId,
-    updateTransaction,
-} from "@/src/repositories/transaction.repository";
-import type {
-    CreateTransactionInput,
-    TransactionFilters,
-    UpdateTransactionData,
-} from "@/src/types/transaction";
+import { findCategoryByIdAndUserId } from "@/src/repositories/category.repository";
+import { createTransaction, deleteTransaction, findTransactionsByUserIdWithFilters, findTransactionByIdAndUserId, getMonthlyTransactionSummary, updateTransaction } from "@/src/repositories/transaction.repository";
+import type { TransactionFilters, CreateTransactionInput, UpdateTransactionData } from "@/src/types/transaction";
+import { transactionIdSchema } from "@/validations/transaction.validation";
+
+function assertTransactionId(id: string) {
+    const result = transactionIdSchema.safeParse(id);
+
+    if (!result.success) {
+        throw new AppError(
+            "VALIDATION_ERROR",
+            "Invalid transaction.",
+            400
+        );
+    }
+}
 
 function ensureAuthenticated(userId: string) {
     if (!userId) {
@@ -78,22 +78,40 @@ export async function createTransactionService(userId: string, data: CreateTrans
     return createTransaction({...data, userId});
 }
 
-export async function getTransactionsService(
-    userId: string,
-    filters: TransactionFilters
-) {
+export async function getTransactionsService(userId: string, filters: TransactionFilters) {
     ensureAuthenticated(userId);
 
-    return findTransactionsByUserId(userId, filters);
-}
+    const repositoryFilters = { ...filters };
 
-export async function getTransactionFilterCategoriesService(userId: string) {
-    ensureAuthenticated(userId);
+    if (filters.month) {
+        const [yearString, monthString] = filters.month.split("-");
 
-    return findCategoriesByUserId(userId);
+        const year = Number(yearString);
+        const monthNumber = Number(monthString);
+
+        repositoryFilters.startDate = new Date(year, monthNumber - 1, 1);
+
+        repositoryFilters.endDate = new Date(year, monthNumber, 1);
+    }
+
+    const result = await findTransactionsByUserIdWithFilters(userId, repositoryFilters);
+
+    const totalPages = Math.ceil(result.total / filters.limit);
+
+    return {
+        data: result.transactions,
+        pagination: {
+            page: filters.page,
+            limit: filters.limit,
+            total: result.total,
+            totalPages
+        }
+    };
 }
 
 export async function getTransactionByIdService(id: string, userId: string) {
+    assertTransactionId(id);
+
     ensureAuthenticated(userId);
 
     const transaction = await findTransactionByIdAndUserId(id, userId);
@@ -110,6 +128,8 @@ export async function updateTransactionService(
     userId: string,
     data: UpdateTransactionData
 ) {
+    assertTransactionId(id);
+
     ensureAuthenticated(userId);
 
     const existingTransaction = await findTransactionByIdAndUserId(id, userId);
@@ -128,6 +148,7 @@ export async function updateTransactionService(
     }
 
     const date = data.date ?? existingTransaction.date;
+    
     if (date > new Date()) {
         throw new AppError(
             "INVALID_DATE",
@@ -136,28 +157,27 @@ export async function updateTransactionService(
         );
     }
 
-    if (data.categoryId || data.type) {
-        const categoryId = data.categoryId ?? existingTransaction.categoryId.toString();
+    
+    const categoryId = data.categoryId ?? existingTransaction.categoryId.toString();
         
-        const category = await findCategoryByIdAndUserId(categoryId, userId);
+    const type = data.type ?? existingTransaction.type;
 
-        if (!category) {
-            throw new AppError(
-                "CATEGORY_NOT_FOUND",
-                "Category not found.",
-                404
-            );
-        }
+    const category = await findCategoryByIdAndUserId(categoryId, userId);
 
-        const type = data.type ?? existingTransaction.type;
-        
-        if (type !== category.type) {
-            throw new AppError(
-                "TRANSACTION_TYPE_MISMATCH",
-                "Transaction type doesn't match category type.",
-                400
-            );
-        }
+    if (!category) {
+        throw new AppError(
+            "CATEGORY_NOT_FOUND",
+            "Category not found.",
+            404
+        );
+    }
+
+    if (type !== category.type) {
+        throw new AppError(
+            "TRANSACTION_TYPE_MISMATCH",
+            "Transaction type doesn't match category type.",
+            400
+        );
     }
 
     const transaction = await updateTransaction(data, id, userId);
@@ -170,6 +190,8 @@ export async function updateTransactionService(
 }
 
 export async function deleteTransactionService(id: string, userId: string) {
+    assertTransactionId(id);
+    
     ensureAuthenticated(userId);
 
     const transaction = await deleteTransaction(id, userId);
@@ -179,4 +201,47 @@ export async function deleteTransactionService(id: string, userId: string) {
     }
 
     return transaction;
+}
+
+export async function getMonthlyTransactionSummaryService(userId: string, month: string) {
+    if (!userId) {
+        throw new AppError(
+            "SESSION_INVALID",
+            "User is not authenticated.",
+            401,
+        );
+    }
+
+    const [yearString, monthString] = month.split("-");
+
+    const year = Number(yearString);
+    const monthNumber = Number(monthString);
+
+    const startDate = new Date(year, monthNumber - 1, 1);
+    const endDate = new Date(year, monthNumber, 1);
+
+    const summary = await getMonthlyTransactionSummary(userId, startDate, endDate);
+
+    let income = 0;
+    let expense = 0;
+
+    for (const item of summary) {
+        const total = Number(item.total.toString());
+
+        if (item._id === "income") {
+            income = total;
+        }
+
+        if (item._id === "expense") {
+            expense = total;
+        }
+    }
+
+    return {
+        year,
+        month: monthNumber,
+        income,
+        expense,
+        balance: income - expense,
+    };
 }

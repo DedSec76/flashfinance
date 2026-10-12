@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 
-import { AppError } from "@/src/lib/errors/app-error";
-import { createUser, findUserByEmail } from "@/src/repositories/user.repository";
-import type { RegisterInput } from "@/src/validations/register.validation";
+import { AppError } from "@/lib/errors/app-error";
+import { createUser, findUserByEmail } from "@/repositories/user.repository";
+import type { RegisterInput } from "@/validations/register.validation";
 
 export async function registerService(data: RegisterInput) {
     const existingUser = await findUserByEmail(data.email);

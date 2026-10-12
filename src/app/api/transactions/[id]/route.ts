@@ -1,7 +1,5 @@
-import { cookies } from "next/headers";
-
-import { AppError } from "@/src/lib/errors/app-error";
-import { getSessionByToken } from "@/src/services/session/session.service";
+import { getCurrentUserId } from "@/src/lib/auth/current-user";
+import { errorResponse, validationError } from "@/src/lib/http/error-response";
 import {
 	deleteTransactionService,
 	getTransactionByIdService,
@@ -19,43 +17,12 @@ export async function GET(
 ) {
 	try {
 		const { id } = await params;
-		const cookieStore = await cookies();
-		const token = cookieStore.get("sessionToken")?.value;
-
-		if (!token) {
-			throw new AppError(
-				"SESSION_INVALID",
-				"Authentication required.",
-				401
-			);
-		}
-
-		const userId = await getSessionByToken(token);
-		const transaction = await getTransactionByIdService(id, userId.toString());
+		const userId = await getCurrentUserId();
+		const transaction = await getTransactionByIdService(id, userId);
 
 		return Response.json(transaction, { status: 200 });
 	} catch (error) {
-		if (error instanceof AppError) {
-			return Response.json(
-				{
-					error: {
-						code: error.code,
-						message: error.message,
-					},
-				},
-				{ status: error.statusCode }
-			);
-		}
-
-		return Response.json(
-			{
-				error: {
-					code: "INTERNAL_SERVER_ERROR",
-					message: "An unexpected error occurred."
-				},
-			},
-			{ status: 500 }
-		);
+		return errorResponse(error);
 	}
 }
 
@@ -69,59 +36,24 @@ export async function PATCH(
 		const result = updateTransactionSchema.safeParse(body);
 
 		if (!result.success) {
-			return Response.json(
-				{
-					error: {
-						code: "VALIDATION_ERROR",
-						message: "Invalid request data.",
-						fields: result.error.flatten().fieldErrors,
-					},
-				},
-				{ status: 400 }
+			const flattened = result.error.flatten();
+
+			return validationError(
+				flattened.fieldErrors,
+				flattened.formErrors[0] ?? "Invalid request data.",
 			);
 		}
 
-		const cookieStore = await cookies();
-		const token = cookieStore.get("sessionToken")?.value;
-
-		if (!token) {
-			throw new AppError(
-				"SESSION_INVALID",
-				"Authentication required.",
-				401
-			);
-		}
-
-		const userId = await getSessionByToken(token);
+		const userId = await getCurrentUserId();
 		const transaction = await updateTransactionService(
 			id,
-			userId.toString(),
+			userId,
 			result.data
 		);
 
 		return Response.json(transaction, { status: 200 });
 	} catch (error) {
-		if (error instanceof AppError) {
-			return Response.json(
-				{
-					error: {
-						code: error.code,
-						message: error.message,
-					},
-				},
-				{ status: error.statusCode }
-			);
-		}
-
-		return Response.json(
-			{
-				error: {
-					code: "INTERNAL_SERVER_ERROR",
-					message: "An unexpected error occurred."
-				},
-			},
-			{ status: 500 }
-		);
+		return errorResponse(error);
 	}
 }
 
@@ -131,45 +63,14 @@ export async function DELETE(
 ) {
 	try {
 		const { id } = await params;
-		const cookieStore = await cookies();
-		const token = cookieStore.get("sessionToken")?.value;
-
-		if (!token) {
-			throw new AppError(
-				"SESSION_INVALID",
-				"Authentication required.",
-				401
-			);
-		}
-
-		const userId = await getSessionByToken(token);
-		await deleteTransactionService(id, userId.toString());
+		const userId = await getCurrentUserId();
+		await deleteTransactionService(id, userId);
 
 		return Response.json(
 			{ message: "Transaction deleted successfully." },
 			{ status: 200 }
 		);
 	} catch (error) {
-		if (error instanceof AppError) {
-			return Response.json(
-				{
-					error: {
-						code: error.code,
-						message: error.message,
-					},
-				},
-				{ status: error.statusCode }
-			);
-		}
-
-		return Response.json(
-			{
-				error: {
-					code: "INTERNAL_SERVER_ERROR",
-					message: "An unexpected error occurred."
-				},
-			},
-			{ status: 500 }
-		);
+		return errorResponse(error);
 	}
 }

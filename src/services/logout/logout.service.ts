@@ -1,5 +1,5 @@
-import { hashSessionToken } from "@/src/lib/auth/session";
-import { deleteSessionByTokenHash } from "@/src/repositories/session.repository";
+import { hashSessionToken } from "@/lib/auth/session";
+import { deleteSessionByTokenHash } from "@/repositories/session.repository";
 
 export async function logoutService(token: string) {
             
