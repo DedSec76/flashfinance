@@ -40,27 +40,31 @@ export default async function MonthlyReportsPage({ searchParams }: MonthlyReport
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Monthly Report"
         subtitle="Income, expenses, and balance for one calendar month."
       />
-      <form method="get" className="card">
-        <div className="form-group">
+      <form method="get" className="card form-panel">
+        <div className="form-group month-field">
           <label htmlFor="month">Month</label>
           <input
             id="month"
             name="month"
             type="month"
             defaultValue={parsedMonth.success ? parsedMonth.data : currentMonthValue()}
+            aria-invalid={parsedMonth.success ? undefined : true}
+            aria-describedby={parsedMonth.success ? undefined : "month-error"}
           />
         </div>
-        <button className="btn btn-primary" type="submit" style={{ marginTop: "var(--space-md)" }}>
-          Show month
-        </button>
+        <div className="form-actions">
+          <button className="btn btn-primary" type="submit">
+            Show month
+          </button>
+        </div>
       </form>
       {parsedMonth.success ? null : (
-        <ErrorState title="Invalid month" message="Enter a month like 2026-09." />
+        <ErrorState id="month-error" title="Invalid month" message="Enter a month like 2026-09." />
       )}
       {loadError ? <ErrorState message={loadError} /> : null}
       {summary ? (

@@ -1,13 +1,17 @@
 type PageHeaderProps = {
   title: string;
   subtitle?: string;
+  actions?: React.ReactNode;
 };
 
-export function PageHeader({ title, subtitle }: PageHeaderProps) {
+export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   return (
-    <div>
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{title}</h1>
-      {subtitle ? <p className="mt-1 text-sm text-zinc-600">{subtitle}</p> : null}
+    <div className="page-header">
+      <div>
+        <h1>{title}</h1>
+        {subtitle ? <p>{subtitle}</p> : null}
+      </div>
+      {actions ? <div className="page-header-actions">{actions}</div> : null}
     </div>
   );
 }

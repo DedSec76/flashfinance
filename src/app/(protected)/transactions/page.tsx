@@ -59,16 +59,16 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageHeader
-          title="Transactions"
-          subtitle="Review and manage your income and expenses."
-        />
-        <Link className="btn btn-primary" href="/transactions/new">
-          Create Transaction
-        </Link>
-      </div>
+    <div className="page-stack">
+      <PageHeader
+        title="Transactions"
+        subtitle="Review and manage your income and expenses."
+        actions={
+          <Link className="btn btn-primary" href="/transactions/new">
+            Create Transaction
+          </Link>
+        }
+      />
 
       {params.saved === "1" ? (
         <p className="alert alert-success" role="status">

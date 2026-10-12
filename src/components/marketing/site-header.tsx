@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useId, useState } from "react";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -27,8 +28,27 @@ function Mark({ light }: { light: boolean }) {
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const menuId = useId();
+  const [openPath, setOpenPath] = useState<string | null>(null);
+  const open = openPath === pathname;
   const onHero = pathname === "/";
   const onDark = pathname === "/about" || pathname === "/contact";
+  const onLight = !onHero && !onDark;
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpenPath(null);
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <header
@@ -41,18 +61,32 @@ export function SiteHeader() {
       }
     >
       <div
-        className={`mx-auto flex w-full items-center justify-between gap-4 ${
+        className={`site-bar mx-auto flex w-full items-center justify-between gap-4 ${
           onHero ? "max-w-[1440px] px-6 py-6 md:px-10" : "max-w-6xl px-6 py-4"
         }`}
       >
         <Link href="/" aria-label="Flash Finance" className="inline-flex items-center gap-2">
           <Mark light={onHero || onDark} />
           {onHero ? null : (
-            <span className="text-sm font-bold tracking-wide text-[var(--color-heading)]">Flash Finance</span>
+            <span
+              className={`text-sm font-bold tracking-wide ${onDark ? "" : "text-[var(--color-heading)]"}`}
+            >
+              Flash Finance
+            </span>
           )}
         </Link>
 
-        <div className="flex items-center gap-6">
+        <button
+          type="button"
+          className="site-menu-button"
+          aria-expanded={open}
+          aria-controls={menuId}
+          onClick={() => setOpenPath((current) => (current === pathname ? null : pathname))}
+        >
+          {open ? "Close" : "Menu"}
+        </button>
+
+        <div id={menuId} className={open ? "site-menu is-open" : "site-menu"}>
           <nav aria-label="Primary" className="flex items-center gap-5">
             {navItems.map((item) => {
               const active = pathname === item.href;
@@ -64,7 +98,9 @@ export function SiteHeader() {
                   aria-current={active ? "page" : undefined}
                   className={
                     onHero || onDark
-                      ? `text-sm hover:text-white ${active ? "underline decoration-white/70 underline-offset-4" : ""}`
+                      ? `text-sm font-medium hover:text-white ${
+                          active ? "underline decoration-white/70 underline-offset-4" : ""
+                        }`
                       : `text-sm font-medium ${
                           active
                             ? "text-[var(--color-primary)]"
@@ -78,11 +114,7 @@ export function SiteHeader() {
             })}
           </nav>
 
-          {onHero || onDark ? (
-            <Link href="/login" className="text-sm hover:text-white">
-              Sign in
-            </Link>
-          ) : (
+          {onLight ? (
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
@@ -94,6 +126,10 @@ export function SiteHeader() {
                 Create account
               </Link>
             </div>
+          ) : (
+            <Link href="/login" className="text-sm font-medium hover:text-white">
+              Sign in
+            </Link>
           )}
         </div>
       </div>

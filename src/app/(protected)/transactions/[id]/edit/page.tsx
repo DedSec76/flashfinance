@@ -67,7 +67,7 @@ export default async function EditTransactionPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader title="Edit Transaction" subtitle="Update or remove this transaction." />
       {loadError ? <ErrorState message={loadError} /> : null}
       {initialValues ? (

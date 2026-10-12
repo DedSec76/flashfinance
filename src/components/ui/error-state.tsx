@@ -1,13 +1,14 @@
 type ErrorStateProps = {
+  id?: string;
   title?: string;
   message: string;
 };
 
-export function ErrorState({ title = "Something went wrong", message }: ErrorStateProps) {
+export function ErrorState({ id, title = "Something went wrong", message }: ErrorStateProps) {
   return (
-    <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-      <p className="text-sm font-medium text-red-900">{title}</p>
-      <p className="mt-1 text-sm text-red-700">{message}</p>
+    <div id={id} className="alert alert-error" role="alert">
+      <p className="alert-title">{title}</p>
+      <p>{message}</p>
     </div>
   );
 }

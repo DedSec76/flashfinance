@@ -1,16 +1,19 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart";
-import { MonthlySummaryPanel } from "@/components/reports/monthly-summary-panel";
 import {
   TransactionTable,
   type TransactionTableRow,
 } from "@/components/transactions/transaction-table";
 import { TransactionFilterBar } from "@/components/transactions/transaction-filter-bar";
+import { ErrorState } from "@/components/ui/error-state";
 import { StatCard } from "@/components/ui/stat-card";
-import { getSessionByToken } from "@/services/session/session.service";
+import { getCurrentUserId } from "@/lib/auth/current-user";
+import { AppError } from "@/lib/errors/app-error";
+import { formatUsd, readMoney, roundMoney } from "@/lib/money";
+import { listCategoriesService } from "@/services/category/category.service";
+import type { SummaryCategory } from "@/services/summary/summary.service";
 import { getTransactionsService } from "@/services/transaction/transaction.service";
 
 type DashboardPageProps = {
@@ -28,25 +31,12 @@ type DashboardTransaction = {
   categoryId: string;
 };
 
-function getAmount(value: unknown): number {
-  if (typeof value === "number") {
-    return value;
+function failureMessage(error: unknown) {
+  if (error instanceof AppError) {
+    return error.message;
   }
 
-  if (typeof value === "string") {
-    return Number(value);
-  }
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toString" in value &&
-    typeof value.toString === "function"
-  ) {
-    return Number(value.toString());
-  }
-
-  return 0;
+  return "An unexpected error occurred.";
 }
 
 export default async function DashboardPage({
@@ -56,100 +46,124 @@ export default async function DashboardPage({
   const selectedMonth = params.month;
 
   let transactions: DashboardTransaction[] = [];
+  let categories: SummaryCategory[] = [];
+  let loadError = "";
 
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("sessionToken")?.value;
+    const userId = await getCurrentUserId();
+    const [records, categoryRecords] = await Promise.all([
+      getTransactionsService(userId),
+      listCategoriesService(userId),
+    ]);
+    const [year, monthNumber] = (selectedMonth ?? "").split("-").map(Number);
+    const hasMonth =
+      Number.isInteger(year) &&
+      Number.isInteger(monthNumber) &&
+      monthNumber >= 1 &&
+      monthNumber <= 12;
+    const startDate = hasMonth ? new Date(year, monthNumber - 1, 1) : undefined;
+    const endDate = hasMonth ? new Date(year, monthNumber, 1) : undefined;
 
-    if (token) {
-      const userId = await getSessionByToken(token);
-
-      let startDate: Date | undefined;
-      let endDate: Date | undefined;
-
-      if (selectedMonth) {
-        const [year, monthNumber] = selectedMonth.split("-").map(Number);
-
-        if (
-          Number.isInteger(year) &&
-          Number.isInteger(monthNumber) &&
-          monthNumber >= 1 &&
-          monthNumber <= 12
-        ) {
-          startDate = new Date(year, monthNumber - 1, 1);
-          endDate = new Date(year, monthNumber, 1);
-        }
+    transactions = records.filter((transaction) => {
+      if (!startDate || !endDate) {
+        return true;
       }
 
-      transactions = await getTransactionsService(
-        userId.toString(),
-        startDate,
-        endDate,
+      const date = new Date(transaction.date);
+      return date >= startDate && date < endDate;
+    });
+    const totals = new Map<string, number>();
+
+    for (const transaction of transactions) {
+      const categoryId = String(transaction.categoryId);
+      totals.set(
+        categoryId,
+        roundMoney((totals.get(categoryId) ?? 0) + readMoney(transaction.amount)),
       );
     }
-  } catch {
-    transactions = [];
+
+    categories = categoryRecords.map((category) => ({
+      id: category.id,
+      name: category.name,
+      type: category.type,
+      total: totals.get(category.id) ?? 0,
+    }));
+  } catch (error) {
+    loadError = failureMessage(error);
   }
 
-  const totalIncome = transactions
-    .filter((transaction) => transaction.type === "income")
-    .reduce((total, transaction) => total + getAmount(transaction.amount), 0);
+  const categoryNames = new Map(categories.map((category) => [category.id, category.name]));
 
-  const totalExpenses = transactions
-    .filter((transaction) => transaction.type === "expense")
-    .reduce((total, transaction) => total + getAmount(transaction.amount), 0);
-
-  const balance = totalIncome - totalExpenses;
-
-  const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
-
-  const tableRows: TransactionTableRow[] = transactions.map(
-    (transaction) => ({
-      id: transaction.id,
-      title: transaction.title,
-      date: new Date(transaction.date).toLocaleDateString(),
-      type: transaction.type,
-      amount: formatCurrency(getAmount(transaction.amount)),
-      category: transaction.categoryId,
-    }),
+  const totalIncome = roundMoney(
+    transactions
+      .filter((transaction) => transaction.type === "income")
+      .reduce((total, transaction) => total + readMoney(transaction.amount), 0),
   );
 
+  const totalExpenses = roundMoney(
+    transactions
+      .filter((transaction) => transaction.type === "expense")
+      .reduce((total, transaction) => total + readMoney(transaction.amount), 0),
+  );
+
+  const balance = roundMoney(totalIncome - totalExpenses);
+
+  const tableRows: TransactionTableRow[] = transactions.map((transaction) => {
+    const categoryId = String(transaction.categoryId);
+
+    return {
+      id: String(transaction.id),
+      title: transaction.title,
+      date: new Date(transaction.date).toLocaleDateString("en-US"),
+      type: transaction.type,
+      amount: formatUsd(readMoney(transaction.amount)),
+      category: categoryNames.get(categoryId) ?? "Category",
+    };
+  });
+
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Dashboard"
         subtitle="Overview of your current financial status."
+        actions={
+          <>
+            <Link className="btn btn-primary" href="/transactions/new">
+              Create Transaction
+            </Link>
+            <Link className="btn btn-secondary" href="/categories">
+              Create Category
+            </Link>
+          </>
+        }
       />
 
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href="/transactions/new"
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-        >
-          Create Transaction
-        </Link>
+      {loadError ? <ErrorState message={loadError} /> : null}
 
-        <Link
-          href="/categories"
-          className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-        >
-          Create Category
-        </Link>
-      </div>
+      {loadError ? null : (
+        <>
+          <section aria-label="Balance summary">
+            <div className="dashboard-grid">
+              <StatCard title="Income" value={formatUsd(totalIncome)} tone="income" />
+              <StatCard title="Expenses" value={formatUsd(totalExpenses)} tone="expense" />
+              <StatCard
+                title="Balance"
+                value={formatUsd(balance)}
+                tone={balance < 0 ? "expense" : balance > 0 ? "income" : "neutral"}
+              />
+            </div>
+          </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Income" value={formatCurrency(totalIncome)} />
-        <StatCard title="Expenses" value={formatCurrency(totalExpenses)} />
-        <StatCard title="Balance" value={formatCurrency(balance)} />
-      </div>
+          <TransactionFilterBar />
 
-      <TransactionFilterBar />
+          <section className="stack" aria-labelledby="dashboard-transactions">
+            <h2 id="dashboard-transactions">Transactions</h2>
+            <TransactionTable rows={tableRows} />
+          </section>
 
-      <TransactionTable rows={tableRows} />
-
-      <MonthlySummaryPanel />
-
-      <CategoryBreakdownChart />
+          <CategoryBreakdownChart title="Categories" categories={categories} />
+        </>
+      )}
     </div>
   );
 }

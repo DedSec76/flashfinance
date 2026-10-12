@@ -1,15 +1,18 @@
+import Link from "next/link";
+
 type TransactionRowActionsProps = {
   id: string;
+  title: string;
 };
 
-export function TransactionRowActions({ id }: TransactionRowActionsProps) {
+export function TransactionRowActions({ id, title }: TransactionRowActionsProps) {
   return (
-    <div className="flex gap-2 text-xs">
-      <a className="rounded border border-zinc-300 px-2 py-1 hover:bg-zinc-100" href={`/transactions/${id}/edit`}>
-        Edit
-      </a>
-      <button type="button" className="rounded border border-red-300 px-2 py-1 text-red-700 hover:bg-red-50">
-        Delete
+    <div className="item-actions">
+      <Link className="btn btn-secondary btn-sm" href={`/transactions/${id}/edit`}>
+        Edit<span className="sr-only"> {title}</span>
+      </Link>
+      <button type="button" className="btn btn-danger-outline btn-sm">
+        Delete<span className="sr-only"> {title}</span>
       </button>
     </div>
   );

@@ -255,13 +255,7 @@ export function TransactionForm({
 
   return (
     <div className="space-y-4">
-      <form
-        className="card"
-        style={{ display: "grid", gap: "var(--space-md)" }}
-        onSubmit={handleSubmit}
-        noValidate
-        aria-busy={pending}
-      >
+      <form className="card form-panel" onSubmit={handleSubmit} noValidate aria-busy={pending}>
         <div className="form-group">
           <label htmlFor="title">Title</label>
           <input
@@ -273,7 +267,7 @@ export function TransactionForm({
             disabled={pending}
           />
           {errors.title ? (
-            <p id="title-error" className="text-danger">
+            <p id="title-error" className="field-error">
               {errors.title}
             </p>
           ) : null}
@@ -293,7 +287,7 @@ export function TransactionForm({
             <option value="expense">expense</option>
           </select>
           {errors.type ? (
-            <p id="type-error" className="text-danger">
+            <p id="type-error" className="field-error">
               {errors.type}
             </p>
           ) : null}
@@ -314,7 +308,7 @@ export function TransactionForm({
             disabled={pending}
           />
           {errors.amount ? (
-            <p id="amount-error" className="text-danger">
+            <p id="amount-error" className="field-error">
               {errors.amount}
             </p>
           ) : null}
@@ -333,7 +327,7 @@ export function TransactionForm({
             disabled={pending}
           />
           {errors.date ? (
-            <p id="date-error" className="text-danger">
+            <p id="date-error" className="field-error">
               {errors.date}
             </p>
           ) : null}
@@ -365,7 +359,7 @@ export function TransactionForm({
             </p>
           ) : null}
           {errors.categoryId ? (
-            <p id="category-error" className="text-danger">
+            <p id="category-error" className="field-error">
               {errors.categoryId}
             </p>
           ) : null}
@@ -383,7 +377,7 @@ export function TransactionForm({
             disabled={pending}
           />
           {errors.description ? (
-            <p id="description-error" className="text-danger">
+            <p id="description-error" className="field-error">
               {errors.description}
             </p>
           ) : null}
@@ -405,12 +399,10 @@ export function TransactionForm({
       </form>
 
       {mode === "edit" && transactionId ? (
-        <section className="card">
+        <section className="card form-panel">
           <h2>Delete transaction</h2>
-          <p className="text-muted" style={{ marginTop: "var(--space-sm)" }}>
-            This permanently removes the transaction from your account.
-          </p>
-          <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
+          <p className="text-muted">This permanently removes the transaction from your account.</p>
+          <div className="form-actions">
             {confirmDelete ? (
               <>
                 <button

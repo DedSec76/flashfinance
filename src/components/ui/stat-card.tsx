@@ -9,8 +9,8 @@ export function StatCard({ title, value, tone = "neutral" }: StatCardProps) {
     tone === "income" ? "transaction-income" : tone === "expense" ? "transaction-expense" : "";
 
   return (
-    <section className="dashboard-card">
-      <p className="dashboard-card-title">{title}</p>
+    <section className="dashboard-card" aria-label={`${title} ${value}`}>
+      <h2 className="dashboard-card-title">{title}</h2>
       <p className={`dashboard-card-value ${valueClass}`}>{value}</p>
     </section>
   );

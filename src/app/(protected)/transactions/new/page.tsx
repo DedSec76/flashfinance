@@ -35,18 +35,18 @@ export default async function NewTransactionPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader title="New Transaction" subtitle="Add a new income or expense entry." />
       {loadError ? <ErrorState message={loadError} /> : null}
       {categories && categories.length === 0 ? (
-        <section className="card">
+        <section className="card form-panel">
           <h2>Add a category first</h2>
-          <p className="text-muted" style={{ marginTop: "var(--space-sm)" }}>
-            Transactions need an income or expense category from your account.
-          </p>
-          <Link className="btn btn-primary" href="/categories" style={{ marginTop: "var(--space-md)" }}>
-            Create a category
-          </Link>
+          <p className="text-muted">Transactions need an income or expense category from your account.</p>
+          <div className="form-actions">
+            <Link className="btn btn-primary" href="/categories">
+              Create a category
+            </Link>
+          </div>
         </section>
       ) : null}
       {categories && categories.length > 0 ? <TransactionForm mode="create" categories={categories} /> : null}
