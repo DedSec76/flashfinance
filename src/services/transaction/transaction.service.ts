@@ -1,7 +1,20 @@
 import { AppError } from "@/src/lib/errors/app-error";
 import { findCategoryByIdAndUserId } from "@/src/repositories/category.repository";
-import { createTransaction, deleteTransaction, findTransactionByIdAndUserId, findTransactionsByUserId, getMonthlyTransactionSummary, updateTransaction } from "@/src/repositories/transaction.repository";
-import type { CreateTransactionInput, UpdateTransactionData } from "@/src/types/transaction";
+import { createTransaction, deleteTransaction, findTransactionsByUserIdWithFilters, findTransactionByIdAndUserId, getMonthlyTransactionSummary, updateTransaction } from "@/src/repositories/transaction.repository";
+import type { TransactionFilters, CreateTransactionInput, UpdateTransactionData } from "@/src/types/transaction";
+import { transactionIdSchema } from "@/validations/transaction.validation";
+
+function assertTransactionId(id: string) {
+    const result = transactionIdSchema.safeParse(id);
+
+    if (!result.success) {
+        throw new AppError(
+            "VALIDATION_ERROR",
+            "Invalid transaction.",
+            400
+        );
+    }
+}
 
 function ensureAuthenticated(userId: string) {
     if (!userId) {
@@ -65,13 +78,40 @@ export async function createTransactionService(userId: string, data: CreateTrans
     return createTransaction({...data, userId});
 }
 
-export async function getTransactionsService(userId: string) {
+export async function getTransactionsService(userId: string, filters: TransactionFilters) {
     ensureAuthenticated(userId);
 
-    return findTransactionsByUserId(userId);
+    const repositoryFilters = { ...filters };
+
+    if (filters.month) {
+        const [yearString, monthString] = filters.month.split("-");
+
+        const year = Number(yearString);
+        const monthNumber = Number(monthString);
+
+        repositoryFilters.startDate = new Date(year, monthNumber - 1, 1);
+
+        repositoryFilters.endDate = new Date(year, monthNumber, 1);
+    }
+
+    const result = await findTransactionsByUserIdWithFilters(userId, repositoryFilters);
+
+    const totalPages = Math.ceil(result.total / filters.limit);
+
+    return {
+        data: result.transactions,
+        pagination: {
+            page: filters.page,
+            limit: filters.limit,
+            total: result.total,
+            totalPages
+        }
+    };
 }
 
 export async function getTransactionByIdService(id: string, userId: string) {
+    assertTransactionId(id);
+
     ensureAuthenticated(userId);
 
     const transaction = await findTransactionByIdAndUserId(id, userId);
@@ -88,6 +128,8 @@ export async function updateTransactionService(
     userId: string,
     data: UpdateTransactionData
 ) {
+    assertTransactionId(id);
+
     ensureAuthenticated(userId);
 
     const existingTransaction = await findTransactionByIdAndUserId(id, userId);
@@ -148,6 +190,8 @@ export async function updateTransactionService(
 }
 
 export async function deleteTransactionService(id: string, userId: string) {
+    assertTransactionId(id);
+    
     ensureAuthenticated(userId);
 
     const transaction = await deleteTransaction(id, userId);

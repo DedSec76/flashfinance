@@ -1,6 +1,6 @@
 import { connectToDatabase } from "../lib/mongodb/connection";
 import { Transaction as TransactionModel } from "../lib/models/transaction.model";
-import type { CreateTransactionData, UpdateTransactionData } from "../types/transaction";
+import type { CreateTransactionData, TransactionFilters, UpdateTransactionData } from "../types/transaction";
 import { Types } from "mongoose";
 
 export async function createTransaction(data: CreateTransactionData) {
@@ -13,6 +13,64 @@ export async function findTransactionsByUserId(userId: string) {
     await connectToDatabase();
 
     return TransactionModel.find({ userId }).sort({ date: -1, createdAt: -1 });
+}
+
+export async function findTransactionsByUserIdWithFilters(userId: string, filters: TransactionFilters) {
+    await connectToDatabase();
+
+    const query: Record<string, unknown> = {
+        userId
+    }
+
+    if (filters.type) {
+        query.type = filters.type;
+    }
+
+    if (filters.categoryId) {
+        query.categoryId = filters.categoryId;
+    }
+
+    if (filters.startDate || filters.endDate) {
+        query.date = {};
+
+        if (filters.startDate) {
+            (query.date as Record<string, Date>).$gte = filters.startDate;
+        }
+
+        if (filters.endDate) {
+            (query.date as Record<string, Date>).$lt = filters.endDate;
+        }
+    }
+
+    if (filters.minAmount !== undefined ||
+        filters.maxAmount !== undefined
+    ) {
+        query.amount = {};
+
+        if (filters.minAmount !== undefined) {
+            (query.amount as Record<string, number>).$gte = filters.minAmount;
+        }
+
+        if (filters.maxAmount !== undefined) {
+            (query.amount as Record<string, number>).$lte = filters.maxAmount;
+        }
+    }
+
+    const skip = (filters.page - 1) * filters.limit;
+
+    const [transactions, total] = await Promise.all([
+        TransactionModel.find(query)
+            .sort({ date: -1, createdAt: -1 })
+            .skip(skip)
+            .limit(filters.limit),
+
+        TransactionModel.countDocuments(query),
+    ]);
+    
+    return {
+        transactions,
+        total,
+    };
 }
 
 export async function findTransactionByIdAndUserId(id: string, userId: string) {
