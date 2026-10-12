@@ -17,7 +17,7 @@ export function MoneySummary({
   balance,
 }: MoneySummaryProps) {
   return (
-    <section className="space-y-3">
+    <section className="stack" aria-label={title}>
       <div>
         <h2>{title}</h2>
         {description ? <p className="text-muted">{description}</p> : null}

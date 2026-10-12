@@ -1,14 +1,12 @@
-import { Header } from "@/src/components/layout/header";
-import { SidebarNav } from "@/src/components/layout/sidebar-nav";
+import { AppFrame } from "@/components/layout/app-frame";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-100">
-      <Header />
-      <div className="flex flex-1 flex-col md:flex-row">
-        <SidebarNav />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
-      </div>
+    <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
+      <AppFrame>{children}</AppFrame>
     </div>
   );
 }

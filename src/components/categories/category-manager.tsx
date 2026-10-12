@@ -144,43 +144,55 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <form className="card" onSubmit={handleSubmit} noValidate>
+    <div className="page-stack">
+      <form className="card form-panel" onSubmit={handleSubmit} noValidate>
         <h2>{editing ? "Edit category" : "New category"}</h2>
-        <div className="form-group" style={{ marginTop: "var(--space-md)" }}>
+        <div className="form-group">
           <label htmlFor="category-name">Category name</label>
           <input
             id="category-name"
             value={name}
             onChange={(event) => setName(event.target.value)}
             aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? "category-name-error" : undefined}
             disabled={submitting}
           />
-          {errors.name ? <p className="text-danger">{errors.name}</p> : null}
+          {errors.name ? (
+            <p id="category-name-error" className="field-error">
+              {errors.name}
+            </p>
+          ) : null}
         </div>
-        <div className="form-group" style={{ marginTop: "var(--space-md)" }}>
+        <div className="form-group">
           <label htmlFor="category-type">Type</label>
           <select
             id="category-type"
             value={type}
             onChange={(event) => setType(event.target.value as "income" | "expense")}
             aria-invalid={Boolean(errors.type)}
+            aria-describedby={errors.type ? "category-type-error" : typeLocked ? "category-type-note" : undefined}
             disabled={submitting || typeLocked}
           >
-            <option value="income">income</option>
-            <option value="expense">expense</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
           </select>
           {typeLocked ? (
-            <p className="text-muted">This category has transactions, so its type stays the same.</p>
+            <p id="category-type-note" className="text-muted">
+              This category has transactions, so its type stays the same.
+            </p>
           ) : null}
-          {errors.type ? <p className="text-danger">{errors.type}</p> : null}
+          {errors.type ? (
+            <p id="category-type-error" className="field-error">
+              {errors.type}
+            </p>
+          ) : null}
         </div>
         {formError ? (
-          <p className="alert alert-error" style={{ marginTop: "var(--space-md)" }}>
+          <p className="alert alert-error" role="alert">
             {formError}
           </p>
         ) : null}
-        <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)" }}>
+        <div className="form-actions">
           <button className="btn btn-primary" type="submit" disabled={submitting}>
             {submitting ? "Saving..." : editing ? "Save changes" : "Save category"}
           </button>
@@ -193,18 +205,18 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       </form>
 
       {categories.length === 0 ? (
-        <div className="card">
+        <div className="card stack">
           <h2>Your categories</h2>
           <p className="text-muted">No categories yet. Create one to organize income and expenses.</p>
         </div>
       ) : (
-        <section className="card">
+        <section className="card stack">
           <h2>Your categories</h2>
-          <ul className="transaction-list" style={{ marginTop: "var(--space-md)" }}>
+          <ul className="transaction-list">
             {categories.map((category) => (
               <li key={category.id} className="transaction-item">
                 <div>
-                  <p style={{ color: "var(--color-heading)", fontWeight: 600 }}>{category.name}</p>
+                  <p className="item-title">{category.name}</p>
                   <span className={category.type === "income" ? "badge badge-income" : "badge badge-expense"}>
                     {category.type}
                   </span>
@@ -214,13 +226,14 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
                       : `${category.transactionCount} transaction${category.transactionCount === 1 ? "" : "s"}`}
                   </p>
                 </div>
-                <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+                <div className="item-actions">
                   <button className="btn btn-secondary" type="button" onClick={() => beginEdit(category)} disabled={submitting}>
                     Edit
                   </button>
                   {category.transactionCount > 0 ? (
                     <button className="btn btn-danger" type="button" disabled>
                       Delete
+                      <span className="sr-only">. Categories with transactions cannot be deleted.</span>
                     </button>
                   ) : pendingDeleteId === category.id ? (
                     <>
@@ -256,7 +269,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
             ))}
           </ul>
           {categories.some((category) => category.transactionCount > 0) ? (
-            <p className="text-muted" style={{ marginTop: "var(--space-md)" }}>
+            <p className="text-muted">
               Categories with transactions can be renamed. Their type cannot change, and they cannot be deleted.
             </p>
           ) : null}

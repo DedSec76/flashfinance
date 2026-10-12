@@ -5,7 +5,7 @@ import { SessionActions } from "@/src/components/profile/session-actions";
 
 export default function ProfilePage() {
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader title="Profile" subtitle="Manage account details and security settings." />
       <ProfileForm />
       <PasswordChangeForm />

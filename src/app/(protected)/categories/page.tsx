@@ -28,7 +28,7 @@ export default async function CategoriesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Categories"
         subtitle="Create and maintain your transaction categories."
