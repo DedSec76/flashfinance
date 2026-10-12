@@ -1,5 +1,5 @@
 import { AppError } from "@/lib/errors/app-error";
-import { findUserByEmail, incrementFailedLoginAttempts, lockUser, resetLoginAttempts } from "@/repositories/user.repository"
+import { findUserByEmail, registerFailedLoginAttempt, resetLoginAttempts } from "@/repositories/user.repository"
 import { createSessionService } from "../session/session.service";
 import bcrypt from "bcryptjs";
 
@@ -28,9 +28,9 @@ export async function loginService(email: string, password: string, deviceId: st
     // 4. ¿Está bloqueado?
     if(user.lockedUntil && user.lockedUntil > new Date()) {
         throw new AppError(
-            "LOGIN_FAILED",
-            `User is locked until ${user.lockedUntil}`,
-            400
+            "LOGIN_LOCKED",
+            "Your account is temporarily locked. Please try again later.",
+            423,
         );
     }
         
@@ -39,26 +39,23 @@ export async function loginService(email: string, password: string, deviceId: st
     
     // 6. Si falla → incrementar intentos
     if(!compare) {
-        const failedAttempts = user.failedLoginAttempts + 1;
-        await incrementFailedLoginAttempts(user.id)
+        const result = await registerFailedLoginAttempt(user.id);
 
-        if(failedAttempts >= 3) {
-            const lockedUntil = new Date(Date.now() + 10 * 60 * 1000)
-            
-            await lockUser(user.id, lockedUntil)
-            
+        if(result.locked) {
             throw new AppError(
-                "LOGIN_FAILED",
-                `User is temporarily locked.`,
-                400
-            )
+                "LOGIN_LOCKED",
+                "Your account has been temporarily locked for 10 minutes. Please try again later.",
+                423,
+            );
         }
 
-        const attemptsLeft = 3 - failedAttempts;
+        const attempts = result.attemptsLeft;
+        const attemptMessage = 
+            attempts === 1 ? "You have 1 attempt remaining." : `You have ${attempts} attempts remaining.`;
         
         throw new AppError(
             "LOGIN_FAILED",
-            `error: you have left ${attemptsLeft} attempts`,
+            `Incorrect password. ${attemptMessage}`,
             400
         )
     }

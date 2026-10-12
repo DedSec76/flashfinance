@@ -3,11 +3,12 @@ import { loginService } from "@/services/login/login.service";
 import { LoginSchema } from "@/validations/login.validation";
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import { parseJsonBody } from "@/lib/http/parse-json-body";
 
 export async function POST(request: Request) {
     try {
         const cookieStore = await cookies();
-        const body = await request.json();
+        const body = await parseJsonBody(request);
 
         const result = LoginSchema.safeParse(body)
 

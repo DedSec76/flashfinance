@@ -1,10 +1,11 @@
 import { AppError } from "@/lib/errors/app-error";
+import { parseJsonBody } from "@/lib/http/parse-json-body";
 import { registerService } from "@/services/register/register.service";
 import { RegisterSchema } from "@/validations/register.validation";
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        const body = await parseJsonBody(request);
         const result = RegisterSchema.safeParse(body);
 
         if (!result.success) {

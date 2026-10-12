@@ -12,6 +12,10 @@ export async function POST(request: Request) {
         if (!result.success) {
             const flattened = result.error.flatten();
 
+            console.log(
+                "VALIDATION ERRORS:",
+                JSON.stringify(result.error.flatten(), null, 2)
+            );
             return validationError(
                 flattened.fieldErrors,
                 flattened.formErrors[0] ?? "Invalid request data.",
