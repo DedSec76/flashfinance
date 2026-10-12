@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 export type CategoryType = "income" | "expense";
 
 export interface Category {
@@ -7,3 +9,15 @@ export interface Category {
     type: CategoryType;
     userId: string;
 }
+
+export type CategoryFilter = {
+    _id?: string;
+    id?: string;
+    name: string;
+    type: CategoryType;
+}
+
+export type PopulatedCategory = {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+};

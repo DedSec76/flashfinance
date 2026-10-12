@@ -35,8 +35,16 @@ export async function getUserBySessionToken(token: string) {
         throw new AppError(
             "USER_NOT_FOUND",
             "User not found.",
-            404
+            404,
         );
+    }
+
+    if (user.status !== "active") {
+        throw new AppError(
+            "USER_INACTIVE",
+            "Your account is inactive",
+            403,
+        )
     }
 
     return user;

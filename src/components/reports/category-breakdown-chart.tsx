@@ -1,6 +1,6 @@
 import { formatUsd } from "@/src/lib/money";
 import { EmptyState } from "@/src/components/ui/empty-state";
-import type { SummaryCategory } from "@/src/services/summary/summary.service";
+import type { SummaryCategory } from "@/types/summary";
 
 type CategoryBreakdownProps = {
   title: string;
@@ -13,7 +13,7 @@ export function CategoryBreakdownChart({ title, categories }: CategoryBreakdownP
   return (
     <section className="card stack">
       <h2>{title}</h2>
-      {categories.length === 0 ? (
+      {categories?.length === 0 ? (
         <EmptyState
           title="No categories yet"
           description="Create a category before totals can be grouped."

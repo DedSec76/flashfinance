@@ -1,7 +1,9 @@
 import { connectToDatabase } from "../lib/mongodb/connection";
 import { Transaction as TransactionModel } from "../lib/models/transaction.model";
-import type { CreateTransactionData, UpdateTransactionData } from "../types/transaction";
+import type { CreateTransactionData, TransactionFilters, UpdateTransactionData } from "../types/transaction";
 import { Types } from "mongoose";
+import { SummaryDateRange } from "@/types/summary";
+import { PopulatedCategory } from "@/types/category";
 
 export async function createTransaction(data: CreateTransactionData) {
     await connectToDatabase();
@@ -12,7 +14,68 @@ export async function createTransaction(data: CreateTransactionData) {
 export async function findTransactionsByUserId(userId: string) {
     await connectToDatabase();
 
-    return TransactionModel.find({ userId }).sort({ date: -1, createdAt: -1 });
+    return TransactionModel.find({ userId })
+        .populate<{ categoryId: PopulatedCategory | null }>("categoryId", "name")
+        .sort({ date: -1, createdAt: -1 });
+}
+
+export async function findTransactionsByUserIdWithFilters(userId: string, filters: TransactionFilters) {
+    await connectToDatabase();
+
+    const query: Record<string, unknown> = {
+        userId
+    }
+
+    if (filters.type) {
+        query.type = filters.type;
+    }
+
+    if (filters.categoryId) {
+        query.categoryId = filters.categoryId;
+    }
+
+    if (filters.startDate || filters.endDate) {
+        query.date = {};
+
+        if (filters.startDate) {
+            (query.date as Record<string, Date>).$gte = filters.startDate;
+        }
+
+        if (filters.endDate) {
+            (query.date as Record<string, Date>).$lt = filters.endDate;
+        }
+    }
+
+    if (filters.minAmount !== undefined ||
+        filters.maxAmount !== undefined
+    ) {
+        query.amount = {};
+
+        if (filters.minAmount !== undefined) {
+            (query.amount as Record<string, number>).$gte = filters.minAmount;
+        }
+
+        if (filters.maxAmount !== undefined) {
+            (query.amount as Record<string, number>).$lte = filters.maxAmount;
+        }
+    }
+
+    const skip = (filters.page - 1) * filters.limit;
+
+    const [transactions, total] = await Promise.all([
+        TransactionModel.find(query)
+            .populate<{ categoryId: PopulatedCategory | null }>("categoryId", "name")
+            .sort({ date: -1, createdAt: -1 })
+            .skip(skip)
+            .limit(filters.limit),
+
+        TransactionModel.countDocuments(query),
+    ]);
+    
+    return {
+        transactions,
+        total,
+    };
 }
 
 export async function findTransactionByIdAndUserId(id: string, userId: string) {
@@ -63,6 +126,62 @@ export async function getMonthlyTransactionSummary(userId: string, startDate: Da
             },
         },
     ]);
+}
+
+export async function sumTransactionsByType(
+  userId: string,
+  range?: SummaryDateRange,
+) {
+  await connectToDatabase();
+
+  const match: Record<string, unknown> = {
+    userId: new Types.ObjectId(userId),
+  };
+
+  if (range) {
+    match.date = {
+      $gte: range.start,
+      $lt: range.end,
+    };
+  }
+
+  return TransactionModel.aggregate([
+    { $match: match },
+    {
+      $group: {
+        _id: "$type",
+        total: { $sum: "$amount" },
+      },
+    },
+  ]);
+}
+
+export async function sumTransactionsByCategory(
+  userId: string,
+  range?: SummaryDateRange,
+) {
+  await connectToDatabase();
+
+  const match: Record<string, unknown> = {
+    userId: new Types.ObjectId(userId),
+  };
+
+  if (range) {
+    match.date = {
+      $gte: range.start,
+      $lt: range.end,
+    };
+  }
+
+  return TransactionModel.aggregate([
+    { $match: match },
+    {
+      $group: {
+        _id: "$categoryId",
+        total: { $sum: "$amount" },
+      },
+    },
+  ]);
 }
 
 export async function countTransactionsForCategory(

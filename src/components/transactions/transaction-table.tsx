@@ -1,5 +1,5 @@
-import { TransactionRowActions } from "@/components/transactions/transaction-row-actions";
-import { EmptyState } from "@/components/ui/empty-state";
+import { TransactionRowActions } from "@/src/components/transactions/transaction-row-actions";
+import { EmptyState } from "@/src/components/ui/empty-state";
 
 export type TransactionTableRow = {
   id: string;
@@ -12,9 +12,10 @@ export type TransactionTableRow = {
 
 type TransactionTableProps = {
   rows: TransactionTableRow[];
+  returnTo?: string;
 };
 
-export function TransactionTable({ rows }: TransactionTableProps) {
+export function TransactionTable({ rows, returnTo= "/transactions" }: TransactionTableProps) {
   if (rows.length === 0) {
     return (
       <EmptyState
@@ -25,65 +26,54 @@ export function TransactionTable({ rows }: TransactionTableProps) {
   }
 
   return (
-    <section aria-label="Transactions">
-      <ul className="transaction-cards">
-        {rows.map((row) => (
-          <li key={row.id} className="transaction-item">
-            <div>
-              <p className="item-title">{row.title}</p>
-              <p className="text-muted">
-                {row.date} · {row.category}
-              </p>
-              <span className={row.type === "income" ? "badge badge-income" : "badge badge-expense"}>
-                {row.type}
-              </span>
-            </div>
-            <div>
-              <p className={row.type === "income" ? "transaction-income" : "transaction-expense"}>
-                {row.amount}
-              </p>
-              <TransactionRowActions id={row.id} title={row.title} />
-            </div>
-          </li>
-        ))}
-      </ul>
+    <section className="overflow-hidden rounded-xl border border-[#e5e7eb] bg-white shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-left text-sm">
+          <thead className="bg-[#f9fafb] text-xs uppercase tracking-wide text-[#6b7280]">
+            <tr>
+              <th className="px-5 py-4 font-medium">Date</th>
+              <th className="px-5 py-4 font-medium">Title</th>
+              <th className="px-5 py-4 font-medium">Type</th>
+              <th className="px-5 py-4 font-medium">Category</th>
+              <th className="px-5 py-4 text-right font-medium">Amount</th>
+              <th className="px-5 py-4 font-medium">Actions</th>
+            </tr>
+          </thead>
 
-      <div className="data-table-wrap">
-        <div className="data-table-scroll">
-          <table className="data-table">
-            <caption className="sr-only">Transactions</caption>
-            <thead>
-              <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Title</th>
-                <th scope="col">Type</th>
-                <th scope="col">Category</th>
-                <th scope="col">Amount</th>
-                <th scope="col">Actions</th>
+          <tbody className="divide-y divide-[#f3f4f6]">
+            {rows.map((row) => (
+              <tr key={row.id} className="transition-colors hover:bg-[#f9fafb]">
+                <td className="whitespace-nowrap px-5 py-4 text-[#6b7280]">{row.date}</td>
+                <td className="px-5 py-4 font-medium text-[#0c2340]">{row.title}</td>
+                <td className="px-5 py-4">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                      row.type === "income"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-red-50 text-red-700"
+                    }`}
+                  >
+                    {row.type === "income" ? "Income" : "Expense"}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-[#4b5563]">{row.category}</td>
+                <td
+                  className={`whitespace-nowrap px-5 py-4 text-right font-semibold tabular-nums ${
+                    row.type === "income"
+                      ? "text-green-700"
+                      : "text-red-700"
+                  }`}
+                >
+                  {row.type === "income" ? "+" : "−"}
+                  {row.amount}
+                </td>
+                <td className="whitespace-nowrap px-5 py-4">
+                  <TransactionRowActions id={row.id} returnTo={returnTo}/>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.date}</td>
-                  <td>{row.title}</td>
-                  <td>
-                    <span className={row.type === "income" ? "badge badge-income" : "badge badge-expense"}>
-                      {row.type}
-                    </span>
-                  </td>
-                  <td>{row.category}</td>
-                  <td className={row.type === "income" ? "money transaction-income" : "money transaction-expense"}>
-                    {row.amount}
-                  </td>
-                  <td>
-                    <TransactionRowActions id={row.id} title={row.title} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </section>
   );

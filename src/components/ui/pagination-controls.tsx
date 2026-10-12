@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type PaginationControlsProps = {
   currentPage: number;
   totalPages: number;
@@ -11,26 +13,28 @@ export function PaginationControls({ currentPage, totalPages, getPageHref }: Pag
   const isNextDisabled = currentPage >= totalPages;
 
   return (
-    <nav className="card pagination" aria-label="Pagination">
-      <p>
+    <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600">
+      <span>
         Page {currentPage} of {totalPages}
-      </p>
-      <div className="item-actions">
-        <a
+      </span>
+      <div className="flex gap-2">
+        <Link
           href={getPageHref(previousPage)}
           aria-disabled={isPreviousDisabled}
-          className="btn btn-secondary btn-sm aria-disabled:pointer-events-none aria-disabled:opacity-50"
+          tabIndex={isPreviousDisabled ? -1 : 0}
+          className="rounded-md border border-zinc-300 px-2 py-1 aria-disabled:pointer-events-none aria-disabled:opacity-50"
         >
           Previous
-        </a>
-        <a
+        </Link>
+        <Link
           href={getPageHref(nextPage)}
           aria-disabled={isNextDisabled}
-          className="btn btn-secondary btn-sm aria-disabled:pointer-events-none aria-disabled:opacity-50"
+          tabIndex={isNextDisabled ? -1 : 0}
+          className="rounded-md border border-zinc-300 px-2 py-1 aria-disabled:pointer-events-none aria-disabled:opacity-50"
         >
           Next
-        </a>
+        </Link>
       </div>
-    </nav>
+    </div>
   );
 }

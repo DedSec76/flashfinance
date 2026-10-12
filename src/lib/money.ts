@@ -2,21 +2,24 @@ export function roundMoney(value: number) {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-export function readMoney(value: unknown) {
-  let amount = Number.NaN;
+export function toMoneyNumber(value: unknown): number {
+  const amount =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" || (
+          typeof value === "object" &&
+          value !== null &&
+          "toString" in value &&
+          typeof value.toString === "function"
+        )
+        ? Number(value.toString())
+        : Number.NaN;
 
-  if (typeof value === "number" || typeof value === "string") {
-    amount = Number(value);
-  } else if (
-    typeof value === "object" &&
-    value !== null &&
-    "toString" in value &&
-    typeof value.toString === "function"
-  ) {
-    amount = Number(value.toString());
+  if (!Number.isFinite(amount)) {
+    throw new Error("Invalid monetary amount.");
   }
 
-  return Number.isFinite(amount) ? amount : 0;
+  return roundMoney(amount);
 }
 
 export function formatUsd(amount: number) {

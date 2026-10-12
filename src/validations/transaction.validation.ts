@@ -3,13 +3,17 @@ import { z } from 'zod';
 export const transactionSchema = z.object({
   title: z
     .string('The title is required')
+    .trim()
     .min(1, 'The title cannot be empty'),
     
-  amount: z.coerce
+  amount: z
+    .coerce
     .number('Amount is required')
+    .finite("Amount must be a valid number")
     .positive('Amount must be greater than 0')
     .refine(
-      (value) => Number.isInteger(value * 100),
+      (value) => 
+        Math.abs(value * 100 - Math.round(value * 100)) < 1e-8,
       "The amount cannot have more than two decimal places."
     ),
     
@@ -22,15 +26,29 @@ export const transactionSchema = z.object({
     
   description: z
     .string()
+    .trim()
     .max(1000, 'The description cannot exceed 1,000 characters.')
-    .nullable(),
+    .nullable()
+    .optional(),
     
   date: z
-    .coerce // Convierte automáticamente strings de fecha (ej: '2026-09-27') a objetos Date de JS
-    .date('The date must be a valid date.'),
+    .coerce
+    .date('The date must be a valid date.')
+    .refine(
+      (date) => date <= new Date(),
+      "The transaction date cannot be in the future"
+    ),
 });
 
-export const updateTransactionSchema = transactionSchema.partial();
+export const updateTransactionSchema = transactionSchema
+  .partial()
+  .strict()
+  .refine(
+    (data) => Object.keys(data).length > 0, 
+    {
+      message: "Provide at least one field to update."
+    }
+  );
 
 export const transactionFiltersSchema = z
   .object({
@@ -51,7 +69,8 @@ export const transactionFiltersSchema = z
       .number("Minimum amount must be a number.")
       .positive("Minimum amount must be greater than 0.")
       .refine(
-        (value) => Number.isInteger(value * 100),
+        (value) => 
+          Math.abs(value * 100 - Math.round(value * 100)) < 1e-8,
         "Minimum amount can have at most two decimal places.",
       )
       .optional(),
@@ -59,7 +78,8 @@ export const transactionFiltersSchema = z
       .number("Maximum amount must be a number.")
       .positive("Maximum amount must be greater than 0.")
       .refine(
-        (value) => Number.isInteger(value * 100),
+        (value) => 
+          Math.abs(value * 100 - Math.round(value * 100)) < 1e-8,
         "Maximum amount can have at most two decimal places.",
       )
       .optional(),
@@ -115,6 +135,12 @@ export const transactionSummarySchema = z.object({
     ),
 })
 
+export const transactionIdSchema = z 
+  .string()
+  .regex(/^[0-9a-fA-F]{24}$/, "Invalid transaction.")
+
 export type TransactionSummaryInput = z.infer<typeof transactionSummarySchema>;
 
 export type TransactionInput = z.infer<typeof transactionSchema>;
+
+export type CreateTransactionInput = TransactionInput;

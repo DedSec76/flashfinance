@@ -58,28 +58,12 @@
   --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.08);
 }
 
-
-/* =========================
-   RESET
-   ========================= */
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   font-family: var(--font-family);
   background-color: var(--color-background);
   color: var(--color-text-primary);
   line-height: 1.5;
 }
-
 
 /* =========================
    TYPOGRAPHY
@@ -105,10 +89,6 @@ h2 {
 
 h3 {
   font-size: var(--font-size-lg);
-}
-
-p {
-  color: var(--color-text-secondary);
 }
 
 .text-muted {
@@ -787,7 +767,6 @@ textarea {
   padding: 0.8rem 1.2rem;
   background: var(--glow);
   color: #04120f;
-  text: white;
   font-size: 0.9rem;
   font-weight: 700;
   box-shadow: 0 0 24px rgba(125, 255, 242, 0.45);
@@ -1345,9 +1324,8 @@ textarea {
 .auth-screen {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
-  background: #1a2933;
-  color: #ffffff;
+  background: var(--color-background);
+  color: var(--color-text-primary);
 }
 
 .auth-scene {
@@ -1381,31 +1359,10 @@ textarea {
   max-width: 22rem;
 }
 
-.auth-screen h1 {
-  margin: 0;
-  color: #ffffff;
-  font-size: 3.4rem;
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 0.98;
-}
-
+.auth-screen h1
 .auth-screen h2 {
-  margin: 0 0 1.15rem;
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-
-.auth-screen .auth-lead {
-  max-width: 16.5rem;
-  margin: 1.35rem 0 0;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 0.95rem;
-  font-weight: 400;
-  line-height: 1.55;
+  color: var(--color-heading);
+  
 }
 
 .auth-socials {
