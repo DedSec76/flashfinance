@@ -59,7 +59,6 @@ export function TransactionRowActions({ id, returnTo }: TransactionRowActionsPro
 
     setIsDialogOpen(false);
     setError("");
-
   }
 
   return (

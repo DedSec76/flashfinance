@@ -7,6 +7,7 @@ import type { CategoryView } from "@/src/services/category/category.service";
 
 type CategoryManagerProps = {
   categories: CategoryView[];
+  returnTo?: string;
 };
 
 type FieldErrors = {
@@ -38,7 +39,7 @@ async function readFailure(response: Response) {
   }
 }
 
-export function CategoryManager({ categories }: CategoryManagerProps) {
+export function CategoryManager({ categories, returnTo = "/categories" }: CategoryManagerProps) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [type, setType] = useState<"income" | "expense">("expense");
@@ -108,7 +109,13 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
         return;
       }
 
-      cancelEdit();
+      if (editing) {
+        cancelEdit();
+        router.refresh();
+        return;
+      }
+      
+      router.push(returnTo);
       router.refresh();
     } catch {
       setFormError("Something went wrong. Please try again.");

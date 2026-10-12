@@ -3,10 +3,7 @@ import { PageHeader } from "@/src/components/layout/page-header";
 import { ErrorState } from "@/src/components/ui/error-state";
 import { getCurrentUserId } from "@/src/lib/auth/current-user";
 import { AppError } from "@/src/lib/errors/app-error";
-import {
-  listCategoriesService,
-  type CategoryView,
-} from "@/src/services/category/category.service";
+import { listCategoriesService, type CategoryView } from "@/src/services/category/category.service";
 
 function failureMessage(error: unknown) {
   if (error instanceof AppError) {
@@ -16,7 +13,14 @@ function failureMessage(error: unknown) {
   return "An unexpected error occurred.";
 }
 
-export default async function CategoriesPage() {
+type CategoriesPageProps = {
+  searchParams: Promise<{ returnTo?: string; }>;
+}
+
+export default async function CategoriesPage({ searchParams }: CategoriesPageProps) {
+  const query = await searchParams
+  const returnTo = query.returnTo === "/dashboard" ? "/dashboard" : "/categories";
+  
   let categories: CategoryView[] | null = null;
   let loadError = "";
 
@@ -34,7 +38,7 @@ export default async function CategoriesPage() {
         subtitle="Create and maintain your transaction categories."
       />
       {loadError ? <ErrorState message={loadError} /> : null}
-      {categories ? <CategoryManager categories={categories} /> : null}
+      {categories ? <CategoryManager categories={categories} returnTo={returnTo} /> : null}
     </div>
   );
 }
