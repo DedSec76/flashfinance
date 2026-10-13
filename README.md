@@ -404,13 +404,29 @@ The application also uses TypeScript, reusable UI components, request validation
 
 ## Screenshots
 
-The repository documentation references the following screenshots:
+These are the public screens from a local run.
 
-- `docs/screenshots/home.png`
-- `docs/screenshots/about.png`
-- `docs/screenshots/contact.png`
-- `docs/screenshots/login.png`
-- `docs/screenshots/register.png`
+### Home
+
+![Flash Finance home page](docs/screenshots/home.png)
+
+### About
+
+![About page describing a private account, categories, and monthly review](docs/screenshots/about.png)
+
+### Contact
+
+![Contact page with a message form for Team 2](docs/screenshots/contact.png)
+
+### Sign in
+
+![Sign-in form](docs/screenshots/login.png)
+
+### Register
+
+![Registration form](docs/screenshots/register.png)
+
+The dashboard, transaction list, category manager, monthly report, and profile open after sign-in and need a working `MONGODB_URI`.
 
 Ensure these files exist in the repository and that their paths and filenames match the references before relying on them in the rendered README.
 
