@@ -4,15 +4,15 @@
 
 ## Demo Accounts
 
-
+##
 - **Email:** aldair@example.com
 - **Password:** Aldairrutte123#
-  
+##
 - **Email:** transaction.test@example.com
 - **Password:** Wadwadas123##
-
-- **Email:** "oluwa01@example.com",
-  **Password:** "Oluwaseyi76$$"
+##
+- **Email:** "oluwa01@example.com"
+- **Password:** "Oluwaseyi76$$"
   
 
 FlashFinance is a personal finance application for one person and one account. It keeps income and expenses private, organizes them with categories, and shows the balance for the whole account or for a selected month.
