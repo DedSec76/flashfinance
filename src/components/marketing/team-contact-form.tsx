@@ -57,16 +57,19 @@ export function TeamContactForm() {
     }
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     const nextErrors = validate(values);
     setErrors(nextErrors);
+
     if (Object.keys(nextErrors).length > 0) {
       setStatus("idle");
       return;
     }
 
     const recipients = teamInboxAddresses();
+
     if (recipients.length === 0) {
       setStatus("unlisted");
       return;
@@ -74,15 +77,35 @@ export function TeamContactForm() {
 
     const subject = "Flash Finance — note for Team 2";
     const body = `Name: ${values.name.trim()}\nEmail: ${values.email.trim()}\n\n${values.message.trim()}`;
+    
     const gmailHref = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipients.join(","))}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
     const mailtoHref = `mailto:?bcc=${encodeURIComponent(recipients.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     setStatus("ready");
-    window.open(gmailHref, "_blank", "noopener,noreferrer");
 
-    window.setTimeout(() => {
-      window.location.href = mailtoHref;
-    }, 500);
+    try {
+      const openedWindow = window.open(
+        gmailHref,
+        "_blank",
+        "noopener,noreferrer",
+      );
+
+      if (!openedWindow) {
+        await handleMailToFailure(
+          `To: ${recipients.join(", ")}\nSubject: ${subject}\n\n${body}`,
+        );
+        return;
+      }
+
+      window.setTimeout(() => {
+        window.location.href = mailtoHref;
+      }, 500);
+    } catch {
+      await handleMailToFailure(
+        `To: ${recipients.join(", ")}\nSubject: ${subject}\n\n${body}`,
+      );
+    }
   }
 
   return (
