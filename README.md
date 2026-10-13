@@ -1,8 +1,23 @@
 # FlashFinance
 
+**Live Demo:** [FlashFinance](https://flashfinance-phi.vercel.app/)
+
+## Demo Accounts
+
+- **Email:** aldair@example.com
+- **Password:** Aldairrutte123#
+##
+- **Email:** transaction.test@example.com
+- **Password:** Wadwadas123##
+##
+- **Email:** "oluwa01@example.com"
+- **Password:** "Oluwaseyi76$$"
+##
+
 FlashFinance is a personal finance application for one person and one account. It keeps income and expenses private, organizes them with categories, and shows the balance for the whole account or for a selected month.
 
 Each user registers with an email and password, then works only with their own categories, transactions, and summaries. Another account cannot read or change that data.
+
 
 ## Team Nº 2
 
