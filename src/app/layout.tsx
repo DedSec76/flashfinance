@@ -20,8 +20,35 @@ const displaySerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Flash Finance",
-  description: "Personal finance management for income, expenses, and monthly balance tracking.",
+  metadataBase: new URL("https://flashfinance-phi.vercel.app"),
+
+  title: {
+    default: "Flash Finance | Personal Finance Manager",
+    template: "%s | FlashFinance",
+  },
+
+  description: "Take control of your money with FlashFinance. Track transactions, manage income and expenses, and analyze your monthly financial balance.",
+
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "FlashFinance",
+    title: "FlashFinance | Take Control of Your Money",
+    description: "Track your income, manage expenses, organize categories, and understand your financial health with FlashFinance.",
+    images: [
+      {
+        url: "/og-image.png",
+        alt: "FlashFinance — Personal Finance Management",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "FlashFinance | Take Control of Your Money",
+    description: "Track income, manage expenses, and monitor your financial health with FlashFinance.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
