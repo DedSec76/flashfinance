@@ -22,6 +22,25 @@ export async function createUser(userData: {
     return UserModel.create(userData);
 }
 
+export async function updateUserProfile(
+    userId: string, 
+    data: {
+        firstName: string;
+        lastName: string;
+    },
+) {
+    await connectToDatabase();
+
+    return UserModel.findByIdAndUpdate(
+        userId,
+        { $set: data },
+        {
+            new: true,
+            runValidators: true,
+        },
+    ).select("-passwordHash");
+}
+
 export async function findUserById(userId: string) {
     await connectToDatabase();
 
@@ -131,4 +150,23 @@ export async function registerFailedLoginAttempt(userId: string) {
         attemptsLeft: Math.max(0, 3 - user.failedLoginAttempts),
         lockedUntil: isLocked ? user.lockedUntil : null,
     };
+}
+
+export async function findUserByIdWithPassword(userId: string) {
+    await connectToDatabase();
+
+    return UserModel.findById(userId);
+}
+
+export async function updateUserPassword(
+    userId: string,
+    passwordHash: string,
+) {
+    await connectToDatabase();
+
+    return UserModel.findByIdAndUpdate(
+        userId,
+        { $set: { passwordHash } },
+        { new: true },
+    ).select("-passwordHash");
 }

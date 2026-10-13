@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, } from "react";
 
 const features = [
   {
@@ -47,38 +47,51 @@ const stream = [
 ];
 
 function useShown<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
   const [shown, setShown] = useState(false);
 
-  useEffect(() => {
-    const node = ref.current;
+  const ref = useCallback((node: T | null) => {
     if (!node) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) setShown(true);
+        if (entry?.isIntersecting) {
+          setShown(true)
+          observer.disconnect();
+        }
       },
       { threshold: 0.28 },
     );
 
     observer.observe(node);
+
     return () => observer.disconnect();
   }, []);
 
-  return { ref, shown };
+  return [ref, shown] as const;
+}
+
+function usePrefersReducedMotion() {
+  return useSyncExternalStore(
+    (callback) => {
+      const media = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      );
+
+      media.addEventListener("change", callback)
+
+      return () => media.removeEventListener("change", callback);
+    },
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => true,
+  );
 }
 
 function useCount(target: number, active: boolean) {
   const [value, setValue] = useState(0);
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (!active) return;
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setValue(target);
-      return;
-    }
+    if (!active || reduceMotion) return;
 
     const start = performance.now();
     let frame = 0;
@@ -86,15 +99,20 @@ function useCount(target: number, active: boolean) {
     const tick = (now: number) => {
       const progress = Math.min(1, (now - start) / 1400);
       const eased = 1 - (1 - progress) ** 3;
+
       setValue(Math.round(target * eased));
-      if (progress < 1) frame = requestAnimationFrame(tick);
-    };
+
+      if (progress < 1) {
+        frame = requestAnimationFrame(tick);
+      }
+    }
 
     frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [active, target]);
 
-  return value;
+    return () => cancelAnimationFrame(frame);
+  }, [active, target, reduceMotion]);
+
+  return active && reduceMotion ? target : value;
 }
 
 function money(value: number) {
@@ -123,20 +141,20 @@ function Figure({
 }
 
 export function HomeSections() {
-  const telemetry = useShown<HTMLElement>();
-  const deck = useShown<HTMLElement>();
+  const [telemetryRef, telemetryShown] = useShown<HTMLElement>();
+  const [deckRef, deckShown] = useShown<HTMLElement>();
   const loop = [...stream, ...stream];
 
   return (
     <div className="future">
       <section
-        ref={telemetry.ref}
-        className={`future-telemetry ${telemetry.shown ? "is-shown" : ""}`}
+        ref={telemetryRef}
+        className={`future-telemetry ${telemetryShown ? "is-shown" : ""}`}
         aria-label="Sample month"
       >
         <div className="future-telemetry-glow" aria-hidden="true" />
         {figures.map((figure) => (
-          <Figure key={figure.label} {...figure} active={telemetry.shown} />
+          <Figure key={figure.label} {...figure} active={telemetryShown} />
         ))}
         <Link href="/register" className="future-cta">
           Start tracking
@@ -144,7 +162,7 @@ export function HomeSections() {
         <p className="future-note">Sample September figures from a single account.</p>
       </section>
 
-      <section ref={deck.ref} className={`future-deck ${deck.shown ? "is-shown" : ""}`}>
+      <section ref={deckRef} className={`future-deck ${deckShown ? "is-shown" : ""}`}>
         <p className="future-status">
           <span className="future-dot" aria-hidden="true" />
           Ledger · sample month · private node
