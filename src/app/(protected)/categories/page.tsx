@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CategoryManager } from "@/src/components/categories/category-manager";
 import { PageHeader } from "@/src/components/layout/page-header";
 import { ErrorState } from "@/src/components/ui/error-state";
@@ -17,6 +18,10 @@ type CategoriesPageProps = {
   searchParams: Promise<{ returnTo?: string; }>;
 }
 
+export const metadata: Metadata = {
+  title: "Categories",
+  description: "Organize your income and expenses with custom categories.",
+};
 export default async function CategoriesPage({ searchParams }: CategoriesPageProps) {
   const query = await searchParams
   const returnTo = query.returnTo === "/dashboard" ? "/dashboard" : "/categories";

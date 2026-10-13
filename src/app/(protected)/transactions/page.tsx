@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { TransactionFilterBar } from "@/components/transactions/transaction-filter-bar";
@@ -70,6 +71,10 @@ function getCurrentHref(params: Record<string, string | string[] | undefined>,) 
   return query ? `/transactions?${query}` : "/transactions";
 }
 
+export const metadata: Metadata = {
+  title: "Transactions",
+  description: "Track, create, edit, and manage your financial transactions.",
+};
 export default async function TransactionsPage({ searchParams }: TransactionsPageProps) {
   const params = await searchParams;
 

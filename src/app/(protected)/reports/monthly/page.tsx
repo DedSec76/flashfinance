@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { CategoryBreakdownChart } from "@/src/components/reports/category-breakdown-chart";
 import { MoneySummary } from "@/src/components/reports/monthly-summary-panel";
 import { PageHeader } from "@/src/components/layout/page-header";
@@ -20,6 +21,11 @@ function failureMessage(error: unknown) {
   return "An unexpected error occurred.";
 }
 
+export const metadata: Metadata = {
+  title: "Monthly Report",
+  description:
+    "Review monthly income, expenses, and balance, filter transactions by month, and track your financial activity.",
+};
 export default async function MonthlyReportsPage({ searchParams }: MonthlyReportsPageProps) {
   const resolvedSearchParams = await searchParams;
   const rawMonth = resolvedSearchParams.month;

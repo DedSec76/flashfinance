@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart";
@@ -37,6 +38,10 @@ function getAmount(value: unknown): number {
   return 0;
 }
 
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Get an overview of your income, expenses, and current balance.",
+};
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
