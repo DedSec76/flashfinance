@@ -1230,7 +1230,11 @@ textarea {
 }
 
 .site-footer .future-cta {
-  color: #04120f;
+  color: #7dfff2;
+}
+
+.site-footer .future-cta:hover {
+  color: black;
 }
 
 .site-footer .future-ghost {

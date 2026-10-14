@@ -11,7 +11,10 @@ export function SiteFooter() {
             A private ledger for income, expenses, and the balance of the month.
           </p>
           <div className="site-footer-actions">
-            <Link href="/register" className="future-cta">
+            <Link
+              href="/register"
+              className="future-cta"
+            >
               Create account
             </Link>
             <Link href="/login" className="future-ghost">
