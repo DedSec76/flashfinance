@@ -2,16 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter  } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "../ui/confirm-dialog";
+import { useToast } from "@/components/providers/toast-provider";
 
 type TransactionRowActionsProps = {
   id: string;
   returnTo: string;
 };
 
-export function TransactionRowActions({ id, returnTo }: TransactionRowActionsProps) {
+export function TransactionRowActions({
+  id,
+  returnTo,
+}: TransactionRowActionsProps) {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -41,14 +46,20 @@ export function TransactionRowActions({ id, returnTo }: TransactionRowActionsPro
             : "Could not delete the transaction. Please try again.";
 
         setError(message);
+        showToast(message, "error");
         return;
       }
 
       setIsDialogOpen(false);
+      showToast("Transaction deleted successfully.", "success");
       router.push(returnTo);
       router.refresh();
     } catch {
-      setError("Network error. Please check your connection and try again.");
+      const message =
+        "Network error. Please check your connection and try again.";
+
+      setError(message);
+      showToast(message, "error");
     } finally {
       setIsDeleting(false);
     }
@@ -64,23 +75,27 @@ export function TransactionRowActions({ id, returnTo }: TransactionRowActionsPro
   return (
     <>
       <div className="flex gap-2 text-xs">
-        <Link className="rounded border border-zinc-300 px-2 py-1 hover:bg-zinc-100" href={`/transactions/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`}>
+        <Link
+          className="rounded border border-zinc-300 px-2 py-1 hover:bg-zinc-100"
+          href={`/transactions/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`}
+        >
           Edit
         </Link>
 
-        <button 
+        <button
           type="button"
           onClick={() => {
             setError("");
             setIsDialogOpen(true);
           }}
-           className="rounded border border-red-300 px-2 py-1 text-red-700 hover:bg-red-50">
+          className="rounded border border-red-300 px-2 py-1 text-red-700 hover:bg-red-50"
+        >
           Delete
         </button>
       </div>
 
       {isDialogOpen && (
-        <ConfirmDialog 
+        <ConfirmDialog
           title="Delete transaction?"
           description="This action cannot be undone. The transaction will be permanently removed from your account."
           confirmLabel="Delete transaction"
